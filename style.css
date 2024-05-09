@@ -1,0 +1,45 @@
+body {
+    background-color: #991111; /* A rich, deep red */
+    color: #fff; /* White text for contrast */
+    font-family: 'Georgia', serif; /* Slightly more elegant card-like font */
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#output {
+    color: #ffdd99; /* Slightly off-white/beige color */
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 15px;
+    margin-bottom: 10px;
+    overflow-y: auto;  /* Add a scrollbar if output gets too long */
+    max-height: none; /* No limit, expands as required */
+    width: 90%; /* Set a specific width if needed */
+}
+
+#terminal {
+    background-color: rgba(0,0,0, 0.8);  
+    padding: 30px;
+    border-radius: 8px;
+    border: 3px double gold; 
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+#input-area {
+    background-color: rgba(0,0,0, 0.5);
+    border: 2px dashed gold;
+    padding: 5px;
+}
+
+#prompt::before { /* Playing card suit symbols */
+    display: inline-block;
+    margin-right: 5px;
+    font-size: 1.2em;  
+}
+
+#prompt.hearts::before { content: "\2665"; } 
+#prompt.diamonds::before { content: "\2666"; }
+#prompt.clubs::before { content: "\2663"; } 
+#prompt.spades::before { content: "\2660"; }  
