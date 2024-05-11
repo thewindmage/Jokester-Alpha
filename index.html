@@ -884,11 +884,13 @@ async def prompt_and_resolve_challenges(player_hand, discard_pile, players_hands
                         await slow_print("Challenge successful. Jokester loses and challenger gets the discard pile.")
                         players_hands[i].extend(discard_pile)
                         discard_pile.clear()
+                        await slow_print(f"Set played successfully. New score for Player {current_player + 1}: {player_sets[current_player]} sets.")
                         return 'challenge_successful'  # Jokester loses, challenge successful
                 elif declaration_type == 'bluff':
                     await slow_print("Bluff called out. Challenge successful. Jokester loses and challenger gets the discard pile.")
                     players_hands[i].extend(discard_pile)
                     discard_pile.clear()
+                    await slow_print(f"Player {current_player + 1} was bluffing!")
                     return 'challenge_successful'  # Jokester loses, challenge successful
 
     if not challenged:
