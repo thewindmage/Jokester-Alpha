@@ -878,6 +878,7 @@ async def prompt_and_resolve_challenges(player_hand, discard_pile, players_hands
                         player_hand.extend(discard_pile)
                         discard_pile.clear()
                         await enforce_discard_penalty(players_hands[i], discard_pile, is_human(i), num_cards=2, current_player=i)
+                        await slow_print(f"Set played successfully. New score for Player {current_player + 1}: {player_sets[current_player]} sets.")
                         return 'challenge_failed'  # Challenge failed, no more challenges should be processed
                     else:
                         await slow_print("Challenge successful. Jokester loses and challenger gets the discard pile.")
