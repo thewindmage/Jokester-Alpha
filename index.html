@@ -189,7 +189,7 @@ async def main():
     joker_possession = {i: 0 for i in range(4)}
 
     while True:
-        mode = await slow_input("Enter 'AI' to play against AI opponents or enter the number of human players: ")
+        mode = await slow_input("Enter 'AI' to play against AI: ")
         if mode == 'ai':
             num_players = 4
             await slow_print("Starting a game against 3 AI opponents.")
@@ -987,21 +987,22 @@ async def prompt_for_discard(player_hand, num_cards):
         list: The list of cards chosen to be discarded.
     """
     await fast_print("Please select cards to discard:")
-    await fast_print(display_hand(player_hand))  # Display the current hand
+    # Display the hand of cards, ensuring this function call is correct based on whether it's async
+    if asyncio.iscoroutinefunction(display_hand):
+        await display_hand(player_hand)  # If display_hand is async, await it
+    else:
+        display_hand(player_hand)  # If it's not async, call it normally
 
     chosen_cards = []
     while len(chosen_cards) < num_cards:
-        try:
-            choice = int(slow_input(f"Enter card number to discard (1-{len(player_hand)}): ")) - 1
-            if 0 <= choice < len(player_hand) and player_hand[choice] not in chosen_cards:
-                chosen_cards.append(player_hand[choice])
-                await fast_print(f"Card chosen: {player_hand[choice]['rank']} of {player_hand[choice]['suit']}")
-            else:
-                await fast_print("Invalid choice or card already chosen, try again.")
-        except ValueError:
-            await fast_print("Please enter a valid integer.")
+        choice = await safe_int_input(f"Enter card number to discard (1-{len(player_hand)}): ", 1, len(player_hand))
+        if player_hand[choice] not in chosen_cards:
+            chosen_cards.append(player_hand[choice])
+            await fast_print(f"Card chosen: {player_hand[choice]['rank']} of {player_hand[choice]['suit']}")
+        else:
+            await fast_print("Card already chosen, try again.")
 
-    # Print cards to be discarded
+    # Print cards to be discarded, awaiting each print
     await fast_print("Cards chosen for discard:")
     for card in chosen_cards:
         await fast_print(f"{card['rank']} of {card['suit']}")
