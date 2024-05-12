@@ -73,8 +73,82 @@
     <div id="input-area">
       <span id="prompt" class="hearts"> $ </span>
       <input type="text" id="user-input" placeholder="Enter commands..." onkeydown="handleKeyDown(event)">
-    </div>
+<button id="rulesButton" style="position: absolute; top: 10px; right: 10px; background-color: gold; color: black; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; font-size: 24px; line-height: 24px;">Rules</button>    </div>
   </div>
+
+<div id="rulesPopup" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 999;">
+  <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; padding: 20px; border-radius: 10px; color: black; text-align: center; max-height: 80%; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #888 #f1f1f1;">
+    <div style="text-align: right;"><button id="closeButton" style="background: none; border: none; font-size: 20px; cursor: pointer;">&#10006;</button></div>
+    <h2 style="font-size: 38px;">Rules for play:</h2>
+    <h1><strong>Game Overview:</strong></h1>
+    <p>This game is a strategic card game that uses standard playing cards, including Jokers. The main objective is to collect sets of four cards and strategically utilize Jokers, which can instantly represent a set of four.</p>
+    
+    <h2><strong>Game Setup:</strong></h2>
+    <ul style="text-align: left; padding-left: 20px;">
+        <li><strong>Deck Composition</strong>: Two standard 54-card decks (including Jokers) are used.</li>
+        <li><strong>Players</strong>: 2 to 10 players can participate. The game accommodates both AI and human players.</li>
+        <li><strong>Starting Hands</strong>: Players begin with 12 cards if there are 2 players, or 10 cards if more than 2 players are playing.</li>
+    </ul>
+
+    <h2>Game Play:</h2>
+    <h3>1. <strong>Shuffling and Dealing</strong>:</h3>
+    <p>Begin by shuffling the deck thoroughly and dealing the determined number of cards to each player.</p>
+
+    <h3>2. <strong>Turns</strong>:</h3>
+    <p>Players take turns in a clockwise direction.<br>
+    Each turn consists of a drawing phase, a playing phase, and a discarding phase.</p>
+
+    <h3>3. <strong>Drawing Cards</strong>:</h3>
+    <p>Players may draw two cards from the deck or one card from the discard pile on their turn.<br>
+    Opting for cards from the discard pile is a strategic move that can reveal what a player might be trying to collect.</p>
+
+    <h3>4. <strong>Playing Sets</strong>:</h3>
+    <p>A set consists of four cards of the same rank.<br>
+    Jokers are powerful, acting as a complete set on their own (equivalent to four identical cards).<br>
+    Players announce sets to accumulate points.</p>
+
+    <h3>5. <strong>Discarding</strong>:</h3>
+    <p>If unable to play a set, players must discard a card to the central discard pile, which is visible to all players.</p>
+
+    <h3>6. <strong>Jokers as Instant Sets</strong>:</h3>
+    <p>Jokers can be declared as an instant set, dramatically influencing the state of the game.<br>
+    They can also be used to claim the discard pile, providing a significant strategic advantage.</p>
+
+    <h3>7. <strong>Jokester Calls</strong>:</h3>
+    <p>A "Jokester" declaration allows a player to claim the discard pile using either a set of four, a Joker, or a bluff.<br>
+    Other players can challenge this declaration, and incorrect challenges result in penalties.</p>
+
+    <h2><strong>Winning the Game:</strong></h2>
+    <ul style="text-align: left; padding-left: 20px;">
+        <li>The game ends when the deck is exhausted.</li>
+        <li>The player with the highest number of sets at the end wins. Collecting four Jokers enables a player to win immediately.</li>
+    </ul>
+
+    <h2><strong>Special Rules:</strong></h2>
+    <p><strong>Bluffing and Challenges</strong>: Bluffing is an integral part of the game. Players may bluff in their Jokester calls, leading to strategic decisions and challenges from opponents.</p>
+
+    <h2><strong>Strategy Tips:</strong></h2>
+    <ul style="text-align: left; padding-left: 20px;">
+        <li>Keep an eye on the discard pile to predict other players' strategies.</li>
+        <li>Use Jokers wisely, as they can be game-changing.</li>
+        <li>Keep track of which cards have been played to better anticipate the remaining deck composition.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+const rulesButton = document.getElementById('rulesButton');
+const rulesPopup = document.getElementById('rulesPopup');
+const closeButton = document.getElementById('closeButton');
+
+rulesButton.addEventListener('click', () => {
+  rulesPopup.style.display = 'block';
+});
+
+closeButton.addEventListener('click', () => {
+  rulesPopup.style.display = 'none';
+});
+</script>
 
 <script>
 const userInput = document.getElementById('user-input');
@@ -82,6 +156,14 @@ const outputDiv = document.getElementById('output');
 const prompt = document.getElementById('prompt');
 const suits = ['hearts', 'diamonds', 'clubs', 'spades'];
 let currentSuit = 0;
+
+document.getElementById("rulesButton").addEventListener("click", function() {
+  document.getElementById("rulesPopup").style.display = "block";
+});
+
+document.getElementById("closeButton").addEventListener("click", function() {
+  document.getElementById("rulesPopup").style.display = "none";
+});
 
 function handleKeyDown(event) {
   if (event.key === "Enter") {
@@ -114,6 +196,14 @@ function handleKeyDown(event) {
 
 userInput.addEventListener('keydown', handleKeyDown);
 
+function instaPrint(message) {
+    const outputDiv = document.getElementById('output'); // Assume 'output' is the ID of your output container
+    const newDiv = document.createElement('div');
+    newDiv.innerHTML = `<br>${message}`; // Add a line break before the message
+    outputDiv.appendChild(newDiv);
+    outputDiv.scrollTop = outputDiv.scrollHeight; // Scroll to the bottom of the output container
+}
+
 setInterval(() => {
   prompt.className = suits[currentSuit];
   currentSuit = (currentSuit + 1) % suits.length;
@@ -141,6 +231,18 @@ async def print_message(message, delay, batch_size=7):
             await asyncio.sleep(delay)
     temp_div.innerHTML += '<br>'  # Append a line break after the message
     output_div.scrollTop = output_div.scrollHeight  # Scroll to the bottom
+
+async def insta_print(message):
+    """
+    Prints a message instantly to the output area with a preceding line break.
+    Args:
+        message (str): The message to be printed.
+    """
+    output_div = document.getElementById('output')  # Get the output div by its ID
+    new_div = document.createElement('div')
+    new_div.innerHTML = f"<br>{message}"  # Add a line break before the message
+    output_div.appendChild(new_div)
+    output_div.scrollTop = output_div.scrollHeight  # Scroll to make sure the new message is visible
 
 async def slow_print(message):
     await print_message(message, delay=0.07, batch_size=5)  # Adjusted delay and batch size
@@ -206,7 +308,7 @@ async def main():
     current_player = 0
 
     while len(standard_deck) > 0:
-        await fast_print("<br>" + "-" * 50)
+        await insta_print("-" * 50)
         await slow_print(f"Player {current_player + 1}'s turn. Current score: {player_sets[current_player]} sets")
         if mode.lower() == 'ai' and current_player != 0:
             # Assuming advanced_ai_turn function is defined and correctly handles asynchronous operations
@@ -828,7 +930,7 @@ async def handle_jokester(player_hand, discard_pile, players_hands, current_play
             await remove_set_of_four_and_claim(player_hand, set_rank, player_sets, current_player, discard_pile)
             await slow_print("Set of four declared successfully. Score updated. Discard pile claimed after challenges.")
             challenge_result = await prompt_and_resolve_challenges(player_hand, discard_pile, players_hands, current_player, num_players, 'set', has_set_of_four, player_sets, set_rank, deck_size)
-            await slow_print(f"Set played successfully. New score for Player {current_player + 1}: {player_sets[current_player]} sets.")
+            #await slow_print(f"Set played successfully. New score for Player {current_player + 1}: {player_sets[current_player]} sets.")
         elif choice == 'b':
             await slow_print(f"{player_description} declares Jokester with a Bluff! Other players may challenge.")
             challenge_result = await prompt_and_resolve_challenges(player_hand, discard_pile, players_hands, current_player, num_players, 'bluff', has_set_of_four, player_sets, set_rank, deck_size)
