@@ -33,6 +33,53 @@ body {
     padding: 5px;
 }
 
+/* Styling for close button */
+#closeButton {
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* Styling for popup content */
+#rulesPopup div {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+body { 
+	font-family: Arial, sans-serif; 
+	line-height: 1.6; 
+	margin: 20px; 
+}
+h1, h2, h3 {
+	color: #333;
+}
+h1 {
+	font-size: 24px;
+	border-bottom: 2px solid #eaecef;
+	padding-bottom: 10px;
+}
+h2 {
+    font-size: 24px; /* Existing size */
+    border-bottom: 1px solid #eaecef;
+    padding-bottom: 6px;
+    text-align: center; /* Centering the text */
+}
+h3 {
+	font-size: 18px;
+	color: #444;
+}
+p, li {
+	font-size: 16px;
+	margin-bottom: 10px;
+}
+ul {
+	padding-left: 20px;
+}
+strong {
+	font-weight: bold;
+}
+
 #prompt::before { /* Playing card suit symbols */
     display: inline-block;
     margin-right: 5px;
