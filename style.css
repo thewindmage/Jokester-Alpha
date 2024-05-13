@@ -106,6 +106,10 @@ strong {
     font-weight: bold;
 }
 
+#prompt {
+    font-size: 1em; /* Adjusted font size for the prompt */
+}
+
 #prompt::before { /* Playing card suit symbols */
     display: inline-block;
     margin-right: 5px;
@@ -136,6 +140,10 @@ body.mobile #input-area {
     flex-direction: row; /* Ensure input area is in a row */
     align-items: center;
     padding: 5px;
+}
+
+body.mobile #prompt {
+    font-size: 0.8em; /* Further reduced font size for prompt */
 }
 
 body.mobile #user-input {
