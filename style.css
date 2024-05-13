@@ -33,6 +33,7 @@ body {
     flex-grow: 1; /* Take remaining space */
     box-sizing: border-box; /* Include padding and border in width calculation */
     word-wrap: break-word; /* Ensure text breaks and wraps to prevent overflow */
+    font-size: 0.8em; /* Reduced font size */
 }
 
 #input-area {
@@ -108,7 +109,7 @@ strong {
 #prompt::before { /* Playing card suit symbols */
     display: inline-block;
     margin-right: 5px;
-    font-size: 1.2em;  
+    font-size: 1em; /* Reduced font size */
 }
 
 #prompt.hearts::before { content: "\2665"; } 
@@ -126,7 +127,7 @@ body.mobile #terminal {
 
 body.mobile #output {
     padding: 5px;
-    font-size: 0.8em; /* Further reduced font size for better fit on mobile */
+    font-size: 0.7em; /* Further reduced font size for better fit on mobile */
     margin-bottom: 5px;
     flex-grow: 1; /* Ensure it takes the available space */
 }
@@ -138,7 +139,7 @@ body.mobile #input-area {
 }
 
 body.mobile #user-input {
-    font-size: 1em;
+    font-size: 0.9em; /* Reduced font size */
     margin-top: 5px;
     width: 100%;
     box-sizing: border-box;
