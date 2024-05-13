@@ -47,17 +47,17 @@ body {
 }
 
 body { 
-	font-family: Arial, sans-serif; 
-	line-height: 1.6; 
-	margin: 20px; 
+    font-family: Arial, sans-serif; 
+    line-height: 1.6; 
+    margin: 20px; 
 }
 h1, h2, h3 {
-	color: #333;
+    color: #333;
 }
 h1 {
-	font-size: 24px;
-	border-bottom: 2px solid #eaecef;
-	padding-bottom: 10px;
+    font-size: 24px;
+    border-bottom: 2px solid #eaecef;
+    padding-bottom: 10px;
 }
 h2 {
     font-size: 24px; /* Existing size */
@@ -66,18 +66,18 @@ h2 {
     text-align: center; /* Centering the text */
 }
 h3 {
-	font-size: 18px;
-	color: #444;
+    font-size: 18px;
+    color: #444;
 }
 p, li {
-	font-size: 16px;
-	margin-bottom: 10px;
+    font-size: 16px;
+    margin-bottom: 10px;
 }
 ul {
-	padding-left: 20px;
+    padding-left: 20px;
 }
 strong {
-	font-weight: bold;
+    font-weight: bold;
 }
 
 #prompt::before { /* Playing card suit symbols */
@@ -89,4 +89,49 @@ strong {
 #prompt.hearts::before { content: "\2665"; } 
 #prompt.diamonds::before { content: "\2666"; }
 #prompt.clubs::before { content: "\2663"; } 
-#prompt.spades::before { content: "\2660"; }  
+#prompt.spades::before { content: "\2660"; } 
+
+/* Mobile-specific styles */
+body.mobile #terminal {
+    width: 95vw;
+    height: 95vh;
+    padding: 10px;
+}
+
+body.mobile #output {
+    padding: 5px;
+    font-size: 0.9em;
+}
+
+body.mobile #input-area {
+    flex-direction: column;
+    align-items: stretch;
+}
+
+body.mobile #user-input {
+    font-size: 1em;
+    margin-top: 5px;
+}
+
+body.mobile #rulesButton {
+    font-size: 14px;
+    padding: 5px 10px;
+}
+
+body.mobile #rulesContent {
+    width: 90%;
+    max-height: 80%;
+    padding: 10px;
+}
+
+body.mobile #closeButton {
+    font-size: 16px;
+}
+
+body.mobile h2, body.mobile h3 {
+    font-size: 1.2em;
+}
+
+body.mobile p, body.mobile li {
+    font-size: 1em;
+}
