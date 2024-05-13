@@ -46,6 +46,16 @@ body {
     box-sizing: border-box;
 }
 
+#user-input {
+    width: 100%;
+    background-color: transparent;
+    color: inherit;
+    border: none;
+    outline: none;
+    font-size: 1.2em;
+    margin-left: 0; /* Remove margin to place next to the prompt */
+}
+
 #rulesButton {
     position: absolute;
     top: 10px;
@@ -149,7 +159,7 @@ body.mobile #prompt {
 body.mobile #user-input {
     font-size: 0.9em; /* Reduced font size */
     margin-top: 0; /* Remove margin */
-    width: 100%;
+    width: calc(100% - 2em); /* Adjusted width */
     box-sizing: border-box;
 }
 
