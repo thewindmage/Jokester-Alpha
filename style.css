@@ -159,7 +159,7 @@ body.mobile #prompt {
 body.mobile #user-input {
     font-size: 0.9em; /* Reduced font size */
     margin-top: 0; /* Remove margin */
-    width: calc(100% - 2em); /* Adjusted width */
+    width: calc(100% - 1em); /* Adjusted width */
     box-sizing: border-box;
 }
 
