@@ -7,17 +7,17 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden; /* Ensure no overflow */
+    overflow: hidden;
 }
 
 #terminal {
     background-color: rgba(0,0,0, 0.8);  
-    padding: 20px;
+    padding: 30px;
     border-radius: 8px;
     border: 3px double gold; 
     box-shadow: 0 0 20px rgba(0,0,0,0.5);
-    width: 100%;
-    height: 100%;
+    width: 80vw;
+    height: 80vh;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -27,10 +27,13 @@ body {
 #output {
     color: #ffdd99; /* Slightly off-white/beige color */
     background-color: rgba(0, 0, 0, 0.7);
-    padding: 10px;
-    margin-bottom: 5px;
+    padding: 15px;
+    margin-bottom: 10px;
     overflow-y: auto;  /* Add a scrollbar if output gets too long */
-    flex-grow: 1; /* Take remaining space */
+    max-height: none; /* No limit, expands as required */
+    width: 100%;
+    height: 100%;
+    flex-grow: 1;
     box-sizing: border-box; /* Include padding and border in width calculation */
     word-wrap: break-word; /* Ensure text breaks and wraps to prevent overflow */
     font-size: 0.8em; /* Reduced font size */
@@ -46,12 +49,6 @@ body {
     box-sizing: border-box;
 }
 
-#prompt {
-    font-size: 1em; /* Adjusted font size for the prompt */
-    display: flex;
-    align-items: center;
-}
-
 #user-input {
     width: 100%;
     background-color: transparent;
@@ -60,7 +57,6 @@ body {
     outline: none;
     font-size: 1.2em;
     margin-left: 0; /* Remove margin to place next to the prompt */
-    flex-grow: 1;
 }
 
 #rulesButton {
@@ -93,6 +89,7 @@ body {
 body { 
     font-family: Arial, sans-serif; 
     line-height: 1.6; 
+    margin: 20px; 
 }
 h1, h2, h3 {
     color: #333;
@@ -123,6 +120,11 @@ strong {
     font-weight: bold;
 }
 
+#prompt {
+    font-size: 1em; /* Adjusted font size for the prompt */
+    display: inline-block; /* Keep the emoji inline */
+}
+
 #prompt::before { /* Playing card suit symbols */
     display: inline-block;
     margin-right: 5px;
@@ -136,8 +138,8 @@ strong {
 
 /* Mobile-specific styles */
 body.mobile #terminal {
-    width: 100%;
-    height: 100%;
+    width: 95vw;
+    height: 95vh;
     padding: 10px;
     box-sizing: border-box;
 }
@@ -153,6 +155,7 @@ body.mobile #input-area {
     flex-direction: row; /* Ensure input area is in a row */
     align-items: center;
     padding: 5px;
+    width: 100%; /* Ensure it uses the full width */
 }
 
 body.mobile #prompt {
@@ -162,9 +165,9 @@ body.mobile #prompt {
 body.mobile #user-input {
     font-size: 0.9em; /* Reduced font size */
     margin-top: 0; /* Remove margin */
-    width: 100%; /* Adjusted width */
-    flex-grow: 1; /* Allow it to grow to fill the space */
+    width: 80%; /* Adjusted width */
     box-sizing: border-box;
+    flex-grow: 1; /* Allow it to grow to fill the space */
 }
 
 body.mobile #rulesButton {
