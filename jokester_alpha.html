@@ -6,7 +6,6 @@
   <title>Jokester: The Card Game</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    /* Existing CSS styles */
     body {
       background-color: #991111;
       color: #fff;
@@ -36,57 +35,34 @@
       background-color: rgba(0, 0, 0, 0.5);
       padding: 15px;
       margin-bottom: 10px;
-      overflow-y: auto; /* Enables vertical scrolling */
-      width: 100%; /* Full width of the parent container */
-      height: 100%; /* Take the full height of the container */
-      flex-grow: 1; /* Allow to grow to fill available space */
-      box-sizing: border-box; /* Includes padding and border in the width calculation */
-      word-wrap: break-word; /* Ensures text breaks and wraps to prevent overflow */
+      overflow-y: auto;
+      width: 100%;
+      height: 100%;
+      flex-grow: 1;
+      box-sizing: border-box;
+      word-wrap: break-word;
     }
-	/*Chrome and others*/
-	/* Styling for the scrollbar track (part the thumb travels along) */
-	#output::-webkit-scrollbar-track {
-	  background-color: #000; /* Dark background for the track */
-	  border-radius: 10px; /* Rounded corners for the track */
-	}
-
-	/* Styling for the scrollbar thumb (the part that you drag) */
-	#output::-webkit-scrollbar-thumb {
-	  background-color: gold; /* Golden color for the thumb */
-	  border-radius: 10px; /* Rounded corners for the thumb */
-	  border: 2px solid #000; /* Optional: black border for the thumb */
-	}
-
-	/* Styling for the scrollbar itself (optional: set size) */
-	#output::-webkit-scrollbar {
-	  width: 8px; /* Width of the scrollbar */
-	  height: 8px; /* Height of the scrollbar (relevant for horizontal scrollbars) */
-	}
-	/* For Firefox */
-	#output {
-	  scrollbar-width: thin; /* "auto" or "thin" */
-	  scrollbar-color: gold #000; /* thumb and track */
-	}
-
-	/* General styles for WebKit browsers, already provided */
-	#output::-webkit-scrollbar-track {
-	  background-color: #000; /* Dark background for the track */
-	  border-radius: 10px; /* Rounded corners for the track */
-	}
-	#output::-webkit-scrollbar-thumb {
-	  background-color: gold; /* Golden color for the thumb */
-	  border-radius: 10px; /* Rounded corners for the thumb */
-	  border: 2px solid #000; /* Optional: black border for the thumb */
-	}
-	#output::-webkit-scrollbar {
-	  width: 8px; /* Width of the scrollbar */
-	  height: 8px; /* Height of the scrollbar (relevant for horizontal scrollbars) */
-	}
-
+    #output::-webkit-scrollbar-track {
+      background-color: #000;
+      border-radius: 10px;
+    }
+    #output::-webkit-scrollbar-thumb {
+      background-color: gold;
+      border-radius: 10px;
+      border: 2px solid #000;
+    }
+    #output::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    #output {
+      scrollbar-width: thin;
+      scrollbar-color: gold #000;
+    }
     #input-area {
       display: flex;
       align-items: center;
-      margin-top: 10px; /* Add a small margin to separate from output */
+      margin-top: 10px;
     }
     #user-input {
       width: 100%;
@@ -95,17 +71,98 @@
       border: none;
       outline: none;
       font-size: 1.2em;
-      margin-left: 0; /* Remove margin to place next to the prompt */
+      margin-left: 0;
     }
     #prompt {
       display: inline-block;
       font-size: 1.5em;
       color: gold;
     }
+    #rulesButton {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: gold;
+      color: black;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-weight: bold;
+      font-size: 24px;
+      line-height: 24px;
+    }
+    #rulesPopup {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      overflow: auto;
+    }
+    #rulesContent {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      color: black;
+      text-align: center;
+      max-height: 80%;
+      overflow-y: auto;
+    }
+    #rulesHeader {
+      text-align: right;
+    }
+    #closeButton {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+    }
+    /* Mobile-specific styles */
+    body.mobile #terminal {
+      width: 95vw;
+      height: 95vh;
+      padding: 10px;
+    }
+    body.mobile #output {
+      padding: 5px;
+      font-size: 0.9em;
+    }
+    body.mobile #input-area {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    body.mobile #user-input {
+      font-size: 1em;
+      margin-top: 5px;
+    }
+    body.mobile #rulesButton {
+      font-size: 14px;
+      padding: 5px 10px;
+    }
+    body.mobile #rulesContent {
+      width: 90%;
+      max-height: 80%;
+      padding: 10px;
+    }
+    body.mobile #closeButton {
+      font-size: 16px;
+    }
+    body.mobile h2, body.mobile h3 {
+      font-size: 1.2em;
+    }
+    body.mobile p, body.mobile li {
+      font-size: 1em;
+    }
   </style>
   <link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css" />
   <script defer src="https://pyscript.net/alpha/pyscript.js"></script>
-
 </head>
 <body>
   <div id="terminal">
@@ -113,145 +170,118 @@
     <div id="input-area">
       <span id="prompt" class="hearts"> $ </span>
       <input type="text" id="user-input" placeholder="Enter commands..." onkeydown="handleKeyDown(event)">
-<button id="rulesButton" style="position: absolute; top: 10px; right: 10px; background-color: gold; color: black; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; font-size: 24px; line-height: 24px;">Rules</button>    </div>
+      <button id="rulesButton">Rules</button>
+    </div>
   </div>
 
-<div id="rulesPopup" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 999;">
-  <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; padding: 20px; border-radius: 10px; color: black; text-align: center; max-height: 80%; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #888 #f1f1f1;">
-    <div style="text-align: right;"><button id="closeButton" style="background: none; border: none; font-size: 20px; cursor: pointer;">&#10006;</button></div>
-    <h2 style="font-size: 38px;">Rules for play:</h2>
-    <h1><strong>Game Overview:</strong></h1>
-    <p>This game is a strategic card game that uses standard playing cards, including Jokers. The main objective is to collect sets of four cards and strategically utilize Jokers, which can instantly represent a set of four.</p>
-    
-    <h2><strong>Game Setup:</strong></h2>
-    <ul style="text-align: left; padding-left: 20px;">
+  <div id="rulesPopup">
+    <div id="rulesContent">
+      <div id="rulesHeader">
+        <button id="closeButton">&#10006;</button>
+      </div>
+      <h2>Rules for play:</h2>
+      <h1><strong>Game Overview:</strong></h1>
+      <p>This game is a strategic card game that uses standard playing cards, including Jokers. The main objective is to collect sets of four cards and strategically utilize Jokers, which can instantly represent a set of four.</p>
+      <h2><strong>Game Setup:</strong></h2>
+      <ul>
         <li><strong>Deck Composition</strong>: Two standard 54-card decks (including Jokers) are used.</li>
         <li><strong>Players</strong>: 2 to 10 players can participate. The game accommodates both AI and human players.</li>
         <li><strong>Starting Hands</strong>: Players begin with 12 cards if there are 2 players, or 10 cards if more than 2 players are playing.</li>
-    </ul>
-
-    <h2>Game Play:</h2>
-    <h3>1. <strong>Shuffling and Dealing</strong>:</h3>
-    <p>Begin by shuffling the deck thoroughly and dealing the determined number of cards to each player.</p>
-
-    <h3>2. <strong>Turns</strong>:</h3>
-    <p>Players take turns in a clockwise direction.<br>
-    Each turn consists of a drawing phase, a playing phase, and a discarding phase.</p>
-
-    <h3>3. <strong>Drawing Cards</strong>:</h3>
-    <p>Players may draw two cards from the deck or one card from the discard pile on their turn.<br>
-    Opting for cards from the discard pile is a strategic move that can reveal what a player might be trying to collect.</p>
-
-    <h3>4. <strong>Playing Sets</strong>:</h3>
-    <p>A set consists of four cards of the same rank.<br>
-    Jokers are powerful, acting as a complete set on their own (equivalent to four identical cards).<br>
-    Players announce sets to accumulate points.</p>
-
-    <h3>5. <strong>Discarding</strong>:</h3>
-    <p>If unable to play a set, players must discard a card to the central discard pile, which is visible to all players.</p>
-
-    <h3>6. <strong>Jokers as Instant Sets</strong>:</h3>
-    <p>Jokers can be declared as an instant set, dramatically influencing the state of the game.<br>
-    They can also be used to claim the discard pile, providing a significant strategic advantage.</p>
-
-    <h3>7. <strong>Jokester Calls</strong>:</h3>
-    <p>A "Jokester" declaration allows a player to claim the discard pile using either a set of four, a Joker, or a bluff.<br>
-    Other players can challenge this declaration, and incorrect challenges result in discarding two card as a penalty.</p>
-
-    <h2><strong>Winning the Game:</strong></h2>
-    <ul>
+      </ul>
+      <h2>Game Play:</h2>
+      <h3>1. <strong>Shuffling and Dealing</strong>:</h3>
+      <p>Begin by shuffling the deck thoroughly and dealing the determined number of cards to each player.</p>
+      <h3>2. <strong>Turns</strong>:</h3>
+      <p>Players take turns in a clockwise direction. Each turn consists of a drawing phase, a playing phase, and a discarding phase.</p>
+      <h3>3. <strong>Drawing Cards</strong>:</h3>
+      <p>Players may draw two cards from the deck or one card from the discard pile on their turn. Opting for cards from the discard pile is a strategic move that can reveal what a player might be trying to collect.</p>
+      <h3>4. <strong>Playing Sets</strong>:</h3>
+      <p>A set consists of four cards of the same rank. Jokers are powerful, acting as a complete set on their own (equivalent to four identical cards). Players announce sets to accumulate points.</p>
+      <h3>5. <strong>Discarding</strong>:</h3>
+      <p>If unable to play a set, players must discard a card to the central discard pile, which is visible to all players.</p>
+      <h3>6. <strong>Jokers as Instant Sets</strong>:</h3>
+      <p>Jokers can be declared as an instant set, dramatically influencing the state of the game. They can also be used to claim the discard pile, providing a significant strategic advantage.</p>
+      <h3>7. <strong>Jokester Calls</strong>:</h3>
+      <p>A "Jokester" declaration allows a player to claim the discard pile using either a set of four, a Joker, or a bluff. Other players can challenge this declaration, and incorrect challenges result in discarding two card as a penalty.</p>
+      <h2><strong>Winning the Game:</strong></h2>
+      <ul>
         <li>The game ends when the deck is exhausted.</li>
         <li>The player with the highest number of sets at the end wins. Collecting four Jokers enables a player to win immediately.</li>
-    </ul>
-
-    <h2><strong>Special Rules:</strong></h2>
-    <p><strong>Bluffing and Challenges</strong>: Bluffing is an integral part of the game. Players may bluff in their Jokester calls, leading to strategic decisions and challenges from opponents.</p>
-
-    <h2><strong>Strategy Tips:</strong></h2>
-    <ul>
+      </ul>
+      <h2><strong>Special Rules:</strong></h2>
+      <p><strong>Bluffing and Challenges</strong>: Bluffing is an integral part of the game. Players may bluff in their Jokester calls, leading to strategic decisions and challenges from opponents.</p>
+      <h2><strong>Strategy Tips:</strong></h2>
+      <ul>
         <li>Keep an eye on the discard pile to predict other players' strategies.</li>
         <li>Use Jokers wisely, as they can be game-changing.</li>
         <li>Keep track of which cards have been played to better anticipate the remaining deck composition.</li>
-    </ul>
+      </ul>
+    </div>
   </div>
-</div>
 
-<script>
-const rulesButton = document.getElementById('rulesButton');
-const rulesPopup = document.getElementById('rulesPopup');
-const closeButton = document.getElementById('closeButton');
+  <script>
+    const rulesButton = document.getElementById('rulesButton');
+    const rulesPopup = document.getElementById('rulesPopup');
+    const closeButton = document.getElementById('closeButton');
+    const userInput = document.getElementById('user-input');
+    const outputDiv = document.getElementById('output');
+    const prompt = document.getElementById('prompt');
+    const suits = ['hearts', 'diamonds', 'clubs', 'spades'];
+    let currentSuit = 0;
 
-rulesButton.addEventListener('click', () => {
-  rulesPopup.style.display = 'block';
-});
+    rulesButton.addEventListener('click', () => {
+      rulesPopup.style.display = 'block';
+    });
 
-closeButton.addEventListener('click', () => {
-  rulesPopup.style.display = 'none';
-});
-</script>
+    closeButton.addEventListener('click', () => {
+      rulesPopup.style.display = 'none';
+    });
 
-<script>
-const userInput = document.getElementById('user-input');
-const outputDiv = document.getElementById('output');
-const prompt = document.getElementById('prompt');
-const suits = ['hearts', 'diamonds', 'clubs', 'spades'];
-let currentSuit = 0;
-
-document.getElementById("rulesButton").addEventListener("click", function() {
-  document.getElementById("rulesPopup").style.display = "block";
-});
-
-document.getElementById("closeButton").addEventListener("click", function() {
-  document.getElementById("rulesPopup").style.display = "none";
-});
-
-function handleKeyDown(event) {
-  if (event.key === "Enter") {
-    event.preventDefault();  // Prevent form submission
-    const commandText = userInput.value.trim();  // Trim whitespace from input
-    if (!commandText) {
-      return; // Exit if the command is empty
+    function handleKeyDown(event) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        const commandText = userInput.value.trim();
+        if (!commandText) return;
+        userInput.disabled = true;
+        const lastDiv = outputDiv.lastElementChild;
+        if (lastDiv) {
+          lastDiv.innerHTML += '&gt; ' + commandText + '<br>';
+        } else {
+          const newDiv = document.createElement('div');
+          newDiv.innerHTML = '&gt; ' + commandText + '<br>';
+          outputDiv.appendChild(newDiv);
+        }
+        outputDiv.scrollTop = outputDiv.scrollHeight;
+        document.dispatchEvent(new CustomEvent('input-received', { detail: commandText }));
+        userInput.value = '';
+        userInput.disabled = false;
+      }
     }
-    userInput.disabled = true;  // Disable input during processing
-    
-    // Retrieve the last div in the output container
-    const lastDiv = outputDiv.lastElementChild;
-    // Append the user command directly to the last div, prefixed by '> '
-    if (lastDiv) {
-      lastDiv.innerHTML += '&gt; ' + commandText + '<br>';
-    } else {
-      // Fallback in case there are no divs yet
+
+    userInput.addEventListener('keydown', handleKeyDown);
+
+    function instaPrint(message) {
       const newDiv = document.createElement('div');
-      newDiv.innerHTML = '&gt; ' + commandText + '<br>';
+      newDiv.innerHTML = `<br>${message}`;
       outputDiv.appendChild(newDiv);
+      outputDiv.scrollTop = outputDiv.scrollHeight;
     }
 
-    // Scroll output to the bottom
-    outputDiv.scrollTop = outputDiv.scrollHeight;
+    setInterval(() => {
+      prompt.className = suits[currentSuit];
+      currentSuit = (currentSuit + 1) % suits.length;
+    }, 1000);
 
-    document.dispatchEvent(new CustomEvent('input-received', { detail: commandText }));
-    userInput.value = '';  // Clear input field after sending the command
-  }
-}
+    // Detect mobile device
+    function isMobile() {
+      return /Mobi|Android/i.test(navigator.userAgent);
+    }
 
-userInput.addEventListener('keydown', handleKeyDown);
-
-function instaPrint(message) {
-    const outputDiv = document.getElementById('output'); // Assume 'output' is the ID of your output container
-    const newDiv = document.createElement('div');
-    newDiv.innerHTML = `<br>${message}`; // Add a line break before the message
-    outputDiv.appendChild(newDiv);
-    outputDiv.scrollTop = outputDiv.scrollHeight; // Scroll to the bottom of the output container
-}
-
-setInterval(() => {
-  prompt.className = suits[currentSuit];
-  currentSuit = (currentSuit + 1) % suits.length;
-}, 1000); // Change suit every 1 second
-</script>
-
-<py-script>
-</py-script>
-
+    if (isMobile()) {
+      document.body.classList.add('mobile');
+    }
+  </script>
+  <py-script>
+  </py-script>
 </body>
 </html>
