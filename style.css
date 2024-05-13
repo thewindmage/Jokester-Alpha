@@ -133,14 +133,14 @@ body.mobile #output {
 }
 
 body.mobile #input-area {
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row; /* Ensure input area is in a row */
+    align-items: center;
     padding: 5px;
 }
 
 body.mobile #user-input {
     font-size: 0.9em; /* Reduced font size */
-    margin-top: 5px;
+    margin-top: 0; /* Remove margin */
     width: 100%;
     box-sizing: border-box;
 }
