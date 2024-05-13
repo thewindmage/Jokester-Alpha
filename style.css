@@ -46,6 +46,12 @@ body {
     box-sizing: border-box;
 }
 
+#prompt {
+    font-size: 1em; /* Adjusted font size for the prompt */
+    display: flex;
+    align-items: center;
+}
+
 #user-input {
     width: 100%;
     background-color: transparent;
@@ -54,6 +60,7 @@ body {
     outline: none;
     font-size: 1.2em;
     margin-left: 0; /* Remove margin to place next to the prompt */
+    flex-grow: 1;
 }
 
 #rulesButton {
@@ -116,10 +123,6 @@ strong {
     font-weight: bold;
 }
 
-#prompt {
-    font-size: 1em; /* Adjusted font size for the prompt */
-}
-
 #prompt::before { /* Playing card suit symbols */
     display: inline-block;
     margin-right: 5px;
@@ -159,7 +162,8 @@ body.mobile #prompt {
 body.mobile #user-input {
     font-size: 0.9em; /* Reduced font size */
     margin-top: 0; /* Remove margin */
-    width: calc(80% - 1em); /* Adjusted width */
+    width: 100%; /* Adjusted width */
+    flex-grow: 1; /* Allow it to grow to fill the space */
     box-sizing: border-box;
 }
 
