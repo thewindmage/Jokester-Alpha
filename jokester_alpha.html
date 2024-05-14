@@ -78,7 +78,7 @@
       outline: none;
       font-size: 1.1em;
       margin-left: 0;
-      pointer-events: none; /* Disable user input initially */
+      pointer-events: auto; /* Ensure the input is clickable */
     }
     #prompt {
       display: inline-block;
@@ -150,7 +150,6 @@
     body.mobile #user-input {
       font-size: 1em;
       margin-top: 5px;
-      pointer-events: none;
     }
     body.mobile #rulesButton {
       font-size: 14px;
@@ -362,6 +361,8 @@
 
     function showInitialButtons() {
       showMobileButtons([{ label: 'AI', value: 'AI' }]);
+      userInput.disabled = true; // Disable input initially until button is clicked
+      userInput.style.pointerEvents = 'none'; // Disable pointer events to prevent focus issues
     }
 
     function showNumberButtons() {
@@ -386,6 +387,8 @@
       if (isMobile) {
         if (input === 'ai') {
           showNumberButtons();
+          userInput.disabled = false; // Enable input after button click
+          userInput.style.pointerEvents = 'auto'; // Re-enable pointer events
         } else if (input === 'jokester') {
           showJokesterButtons();
         } else if (['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'].includes(input) && isJokesterMode) {
@@ -396,10 +399,13 @@
         }
       }
       if (!isMobile) {
+        userInput.disabled = false; // Ensure input is enabled on desktop
+        userInput.style.pointerEvents = 'auto'; // Ensure pointer events are enabled
         userInput.focus(); // Refocus on desktop after receiving input
       }
     });
   </script>
+  
   <py-script>	
 
 from js import document, window
@@ -482,7 +488,7 @@ async def safe_int_input(prompt, min_val, max_val):
                 await fast_print(f"Please enter a number between {min_val} and {max_val}.")
         except ValueError:
             await fast_print("Invalid input. Please enter a valid number.")
-
+	
 async def main():
     global bluffing_history, joker_possession
     bluffing_history = {i: {'bluffs': 0, 'total_calls': 0} for i in range(4)}  # Default to max 4 if AI not chosen
@@ -1314,5 +1320,6 @@ async def prompt_for_discard(player_hand, num_cards):
 
 main()
   </py-script>
+  
 </body>
 </html>
