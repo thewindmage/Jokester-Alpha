@@ -30,6 +30,7 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      box-sizing: border-box;
     }
     #output {
       color: #ffdd99;
@@ -130,8 +131,9 @@
     /* Mobile-specific styles */
     body.mobile #terminal {
       width: 95vw;
-      height: 95vh;
+      height: calc(100vh - 20px); /* Adjust height for better fit */
       padding: 10px;
+      margin-top: 10px; /* Ensure it doesn't go off the top */
     }
     body.mobile #output {
       padding: 5px;
@@ -170,9 +172,6 @@
       flex-direction: row;
       flex-wrap: wrap;
       margin-top: 10px;
-      position: fixed;
-      bottom: 0;
-      width: 100%;
       background-color: rgba(0, 0, 0, 0.8); /* Background color for better visibility */
       padding: 10px;
       box-sizing: border-box;
@@ -214,7 +213,7 @@
       <input type="text" id="user-input" placeholder="Enter commands...">
       <button id="rulesButton">Rules</button>
     </div>
-    <div id="mobile-buttons"></div>
+    <div id="mobile-buttons"></div> <!-- Move inside the terminal -->
   </div>
 
   <div id="rulesPopup">
@@ -394,6 +393,7 @@
     });
   </script>
   <py-script>	
+
 from js import document, window
 import asyncio
 from pyodide import create_proxy
@@ -436,9 +436,14 @@ async def fast_print(message):
 async def slow_input(prompt):
     await fast_print(prompt)
     user_input.disabled = False
-    user_input.focus()
+
+    # Check if the device is mobile
+    is_mobile = 'Mobi' in window.navigator.userAgent or 'Android' in window.navigator.userAgent
+    if not is_mobile:
+        user_input.focus()
 
     promise = asyncio.Future()
+
     def on_input(event):
         command = event.detail
         promise.set_result(command)
@@ -449,24 +454,20 @@ async def slow_input(prompt):
     document.removeEventListener('input-received', input_handler)
     input_handler.destroy()
     user_input.disabled = True
+
     return result.strip().lower()
 
 async def safe_int_input(prompt, min_val, max_val):
     while True:
         try:
-            # Display prompt and receive input
             input_str = await slow_input(prompt)
-            # Convert input to an integer
             selected = int(input_str)
-            # Check if the input is within the valid range
             if min_val <= selected <= max_val:
-                return selected - 1  # Subtract 1 to convert to zero-indexed
+                return selected - 1  # Convert to zero-indexed
             else:
                 await fast_print(f"Please enter a number between {min_val} and {max_val}.")
         except ValueError:
-            # Handle non-integer inputs
             await fast_print("Invalid input. Please enter a valid number.")
-
 
 async def main():
     global bluffing_history, joker_possession
