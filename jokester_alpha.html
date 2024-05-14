@@ -78,6 +78,7 @@
       outline: none;
       font-size: 1.1em;
       margin-left: 0;
+      pointer-events: none; /* Disable user input initially */
     }
     #prompt {
       display: inline-block;
@@ -345,6 +346,7 @@
         btn.innerText = button.label;
         btn.onclick = () => {
           addTextToInput(button.value);
+          userInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' })); // Simulate Enter key press
         };
         mobileButtons.appendChild(btn);
       });
@@ -447,7 +449,7 @@ async def slow_input(prompt):
     is_mobile = 'Mobi' in window.navigator.userAgent or 'Android' in window.navigator.userAgent
 
     if is_mobile:
-        if prompt.lower().startswith("your choice (j/s/b):"):
+        if prompt.toLowerCase().includes("jokester") or prompt.toLowerCase().includes("your choice (j/s/b):"):
             window.showJokesterButtons()
         else:
             window.showNumberButtons()
