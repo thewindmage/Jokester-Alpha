@@ -316,6 +316,13 @@
 
     userInput.addEventListener('keydown', handleKeyDown);
 
+    // Ensure input field can be focused again on desktop
+    userInput.addEventListener('blur', () => {
+      if (!isMobile) {
+        userInput.focus();
+      }
+    });
+
     function instaPrint(message) {
       const newDiv = document.createElement('div');
       newDiv.innerHTML = `<br>${message}`;
@@ -349,13 +356,6 @@
         };
         mobileButtons.appendChild(btn);
       });
-      const sendButton = document.createElement('button');
-      sendButton.classList.add('send-button');
-      sendButton.innerText = 'Send';
-      sendButton.onclick = () => {
-        userInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
-      };
-      mobileButtons.appendChild(sendButton);
       mobileButtons.style.display = 'flex';
     }
 
@@ -383,7 +383,7 @@
     }
 
     document.addEventListener('input-received', (event) => {
-      const input = event.detail.toLowerCase();
+      const input = event.detail.toLowerCase(); // Ensure correct method name
       if (isMobile) {
         if (input === 'ai') {
           showNumberButtons();
@@ -405,7 +405,7 @@
       }
     });
   </script>
-  
+
   <py-script>	
 
 from js import document, window
@@ -455,7 +455,7 @@ async def slow_input(prompt):
     is_mobile = 'Mobi' in window.navigator.userAgent or 'Android' in window.navigator.userAgent
 
     if is_mobile:
-        if prompt.lower() == ("jokester") or prompt.lower() == ("your choice (j/s/b):"):
+        if prompt.lower() == ("your choice (j/s/b): "):
             window.showJokesterButtons()
         else:
             window.showNumberButtons()
@@ -1320,6 +1320,7 @@ async def prompt_for_discard(player_hand, num_cards):
 
 main()
   </py-script>
-  
+
+
 </body>
 </html>
