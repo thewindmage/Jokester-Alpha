@@ -5,216 +5,216 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jokester: The Card Game</title>
   <link rel="stylesheet" href="style.css">
-  <style>
-    body {
-      background-color: #991111;
-      color: #fff;
-      font-family: 'Georgia', serif;
-      margin: 0;
-      padding: 0;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-    #terminal {
-      width: 80vw;
-      max-width: 600px;
-      height: 80vh;
-      max-height: 90vh;
-      background-color: rgba(0,0,0, 0.8);
-      padding: 20px;
-      border-radius: 8px;
-      border: 3px double gold;
-      box-shadow: 0 0 30px rgba(0,0,0,0.5);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      box-sizing: border-box;
-    }
-    #output {
-      color: #ffdd99;
-      background-color: rgba(0, 0, 0, 0.5);
-      padding: 10px;
-      margin-bottom: 10px;
-      overflow-y: auto;
-      width: 100%;
-      height: 100%;
-      flex-grow: 1;
-      font-size: 1em;
-      box-sizing: border-box;
-      word-wrap: break-word;
-    }
-    #output::-webkit-scrollbar-track {
-      background-color: #000;
-      border-radius: 10px;
-    }
-    #output::-webkit-scrollbar-thumb {
-      background-color: gold;
-      border-radius: 10px;
-      border: 2px solid #000;
-    }
-    #output::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-    #output {
-      scrollbar-width: thin;
-      scrollbar-color: gold #000;
-    }
-    #input-area {
-      display: flex;
-      align-items: center;
-      margin-top: 10px;
-      margin-bottom: 10px;
-    }
-    #user-input {
-      width: 100%;
-      background-color: transparent;
-      color: inherit;
-      border: none;
-      outline: none;
-      font-size: 1.1em;
-      margin-left: 0;
-    }
-    #prompt {
-      display: inline-block;
-      font-size: 1.5em;
-      color: gold;
-    }
-    #rulesButton {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background-color: gold;
-      color: black;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      font-weight: bold;
-      font-size: 24px;
-      line-height: 24px;
-    }
-    #rulesPopup {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      z-index: 999;
-      overflow: auto;
-    }
-    #rulesContent {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background-color: white;
-      padding: 20px;
-      border-radius: 10px;
-      color: black;
-      text-align: center;
-      max-height: 80%;
-      overflow-y: auto;
-    }
-    #rulesHeader {
-      text-align: right;
-    }
-    #closeButton {
-      background: none;
-      border: none;
-      font-size: 20px;
-      cursor: pointer;
-    }
-    /* Mobile-specific styles */
-    body.mobile #terminal {
-      width: 95vw;
-      height: 90vh;
-      padding: 10px;
-      margin-top: 10px;
-    }
-    body.mobile #output {
-      padding: 5px;
-      font-size: 0.9em;
-    }
-    body.mobile #input-area {
-      flex-direction: row;
-      align-items: center;
-      margin-top: auto;
-    }
-    body.mobile #user-input {
-      font-size: 1em;
-      margin-top: 5px;
-    }
-    body.mobile #rulesButton {
-      font-size: 14px;
-      padding: 5px 10px;
-    }
-    body.mobile #rulesContent {
-      width: 90%;
-      max-height: 80%;
-      padding: 10px;
-    }
-    body.mobile #closeButton {
-      font-size: 16px;
-    }
-    body.mobile h2, body.mobile h3 {
-      font-size: 1.2em;
-    }
-    body.mobile p, body.mobile li {
-      font-size: 1em;
-    }
-    #mobile-buttons {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      margin-top: 10px;
-      background-color: rgba(0, 0, 0, 0.8);
-      padding: 10px;
-      box-sizing: border-box;
-      justify-content: center;
-    }
-    .mobile-button {
-      background-color: gold;
-      color: black;
-      border: none;
-      padding: 8px;
-      border-radius: 5px;
-      font-size: 14px;
-      margin: 3px;
-      cursor: pointer;
-      flex: 1 1 18%;
-      text-align: center;
-    }
-    .send-button {
-      background-color: black;
-      color: gold;
-      border: 2px solid gold;
-      padding: 8px;
-      border-radius: 5px;
-      font-size: 14px;
-      margin: 3px;
-      cursor: pointer;
-      flex: 1 1 40%;
-      text-align: center;
-    }
-    .backspace-button {
-      background-color: black;
-      color: gold;
-      border: 2px solid gold;
-      padding: 8px;
-      border-radius: 5px;
-      font-size: 14px;
-      margin: 3px;
-      cursor: pointer;
-      flex: 1 1 40%;
-      text-align: center;
-    }
-  </style>
+<style>
+  body {
+    background-color: #991111;
+    color: #fff;
+    font-family: 'Georgia', serif;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  #terminal {
+    width: 100vw; /* Adjusted to make it wider */
+    max-width: 1500px; /* Adjusted to make it wider */
+    height: 80vh;
+    max-height: 90vh;
+    background-color: rgba(0,0,0, 0.8);
+    padding: 20px;
+    border-radius: 8px;
+    border: 3px double gold;
+    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-sizing: border-box;
+  }
+  #output {
+    color: #ffdd99;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    margin-bottom: 10px;
+    overflow-y: auto;
+    width: 100%;
+    height: 100%;
+    flex-grow: 1;
+    font-size: 1.1em;
+    box-sizing: border-box;
+    word-wrap: break-word;
+  }
+  #output::-webkit-scrollbar-track {
+    background-color: #000;
+    border-radius: 10px;
+  }
+  #output::-webkit-scrollbar-thumb {
+    background-color: gold;
+    border-radius: 10px;
+    border: 2px solid #000;
+  }
+  #output::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  #output {
+    scrollbar-width: thin;
+    scrollbar-color: gold #000;
+  }
+  #input-area {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+  #user-input {
+    width: 100%;
+    background-color: transparent;
+    color: inherit;
+    border: none;
+    outline: none;
+    font-size: 1.1em;
+    margin-left: 0;
+  }
+  #prompt {
+    display: inline-block;
+    font-size: 1.5em;
+    color: gold;
+  }
+  #rulesButton {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: gold;
+    color: black;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 24px;
+    line-height: 24px;
+  }
+  #rulesPopup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    overflow: auto;
+  }
+  #rulesContent {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    color: black;
+    text-align: center;
+    max-height: 80%;
+    overflow-y: auto;
+  }
+  #rulesHeader {
+    text-align: right;
+  }
+  #closeButton {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+  }
+  /* Mobile-specific styles */
+  body.mobile #terminal {
+    width: 95vw;
+    height: 90vh;
+    padding: 10px;
+    margin-top: 10px;
+  }
+  body.mobile #output {
+    padding: 5px;
+    font-size: 0.8em;
+  }
+  body.mobile #input-area {
+    flex-direction: row;
+    align-items: center;
+    margin-top: auto;
+  }
+  body.mobile #user-input {
+    font-size: 1em;
+    margin-top: 5px;
+  }
+  body.mobile #rulesButton {
+    font-size: 14px;
+    padding: 5px 10px;
+  }
+  body.mobile #rulesContent {
+    width: 90%;
+    max-height: 80%;
+    padding: 10px;
+  }
+  body.mobile #closeButton {
+    font-size: 16px;
+  }
+  body.mobile h2, body.mobile h3 {
+    font-size: 1.2em;
+  }
+  body.mobile p, body.mobile li {
+    font-size: 1em;
+  }
+  #mobile-buttons {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: 10px;
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 10px;
+    box-sizing: border-box;
+    justify-content: center;
+  }
+  .mobile-button {
+    background-color: gold;
+    color: black;
+    border: none;
+    padding: 8px;
+    border-radius: 5px;
+    font-size: 14px;
+    margin: 3px;
+    cursor: pointer;
+    flex: 1 1 18%;
+    text-align: center;
+  }
+  .send-button {
+    background-color: black;
+    color: gold;
+    border: 2px solid gold;
+    padding: 8px;
+    border-radius: 5px;
+    font-size: 14px;
+    margin: 3px;
+    cursor: pointer;
+    flex: 1 1 40%;
+    text-align: center;
+  }
+  .backspace-button {
+    background-color: black;
+    color: gold;
+    border: 2px solid gold;
+    padding: 8px;
+    border-radius: 5px;
+    font-size: 14px;
+    margin: 3px;
+    cursor: pointer;
+    flex: 1 1 40%;
+    text-align: center;
+  }
+</style>
   <link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css" />
   <script defer src="https://pyscript.net/alpha/pyscript.js"></script>
 </head>
@@ -434,7 +434,7 @@
     });
   </script>
 
-  <py-script>	
+<py-script>	
 
 from js import document, window
 import asyncio
@@ -1350,7 +1350,6 @@ async def prompt_for_discard(player_hand, num_cards):
 
 main()
   </py-script>
-
 
 </body>
 </html>
