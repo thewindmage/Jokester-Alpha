@@ -445,7 +445,13 @@ async def slow_input(prompt):
 
     # Check if the device is mobile
     is_mobile = 'Mobi' in window.navigator.userAgent or 'Android' in window.navigator.userAgent
-    if not is_mobile:
+
+    if is_mobile:
+        if prompt.lower().startswith("your choice (j/s/b):"):
+            window.showJokesterButtons()
+        else:
+            window.showNumberButtons()
+    else:
         user_input.focus()
 
     promise = asyncio.Future()
@@ -1096,9 +1102,6 @@ async def handle_jokester(player_hand, discard_pile, players_hands, current_play
         # Convert keys to option texts and print overview of options
         await slow_print("You have the following options: " + ', '.join(option_texts))
 
-        # Switch to JSB buttons for Jokester call
-        showJokesterButtons()
-
         while True:
             choice = await slow_input("Your choice (J/S/B): ")
             if choice in options:
@@ -1131,9 +1134,6 @@ async def handle_jokester(player_hand, discard_pile, players_hands, current_play
                 player_hand.extend(discard_pile)
                 discard_pile.clear()
                 await slow_print("Jokester claims the discard pile.")
-
-        # Switch back to number buttons after Jokester call
-        showNumberButtons()
 
     else:  # AI players
         has_set_of_four, set_rank = check_for_sets_of_four(player_hand)
