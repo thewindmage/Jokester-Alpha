@@ -202,18 +202,6 @@
       flex: 1 1 40%;
       text-align: center;
     }
-    .backspace-button {
-      background-color: black;
-      color: gold;
-      border: 2px solid gold;
-      padding: 8px;
-      border-radius: 5px;
-      font-size: 14px;
-      margin: 3px;
-      cursor: pointer;
-      flex: 1 1 40%;
-      text-align: center;
-    }
   </style>
   <link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css" />
   <script defer src="https://pyscript.net/alpha/pyscript.js"></script>
@@ -325,10 +313,6 @@
       userInput.value += text;
     }
 
-    function removeLastCharacterFromInput() {
-      userInput.value = userInput.value.slice(0, -1);
-    }
-
     userInput.addEventListener('keydown', handleKeyDown);
 
     // Ensure input field can be focused again on desktop
@@ -370,13 +354,6 @@
         };
         mobileButtons.appendChild(btn);
       });
-      const backspaceButton = document.createElement('button');
-      backspaceButton.classList.add('backspace-button');
-      backspaceButton.innerText = 'Backspace';
-      backspaceButton.onclick = () => {
-        removeLastCharacterFromInput();
-      };
-      mobileButtons.appendChild(backspaceButton);
       const sendButton = document.createElement('button');
       sendButton.classList.add('send-button');
       sendButton.innerText = 'Send';
@@ -434,7 +411,8 @@
     });
   </script>
 
-<py-script>
+  <py-script>	
+
 from js import document, window
 import asyncio
 from pyodide import create_proxy
@@ -482,8 +460,8 @@ async def slow_input(prompt):
     is_mobile = 'Mobi' in window.navigator.userAgent or 'Android' in window.navigator.userAgent
 
     if is_mobile:
-	if prompt.lower() == ("enter 'ai' to play against ai: "):
-	    window.showInitialButtons
+		if prompt.lower() == ("enter 'ai' to play against ai: "):
+			window.showInitialButtons
         if prompt.lower() == ("your choice (j/s/b): "):
             window.showJokesterButtons()
         else:
@@ -1349,6 +1327,8 @@ async def prompt_for_discard(player_hand, num_cards):
 
 main()
   </py-script>
+
+
 
 </body>
 </html>
