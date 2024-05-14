@@ -520,7 +520,7 @@ async def slow_input(prompt):
             window.showInitialButtons()
         elif prompt.lower() == ("your choice (j/s/b): "):
             window.showJokesterButtons()
-        elif re.match(r".*do you want to challenge the Jokester call\? \(y/n\):.*", prompt.lower()):
+        elif prompt == ("Player 1, do you want to challenge the Jokester call? (y/n): ")
             window.showChallengeButtons()
         else:
             window.showNumberButtons()
