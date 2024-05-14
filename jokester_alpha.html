@@ -86,7 +86,7 @@
     }
     #rulesButton {
       position: absolute;
-      top: 50px; /* Adjusted to avoid being obstructed */
+      top: 10px;
       right: 10px;
       background-color: gold;
       color: black;
@@ -125,24 +125,38 @@
       width: 12px;
     }
     #rulesContent::-webkit-scrollbar-track {
-      background: #f1f1f1;
+      background: #f1f1f1; 
     }
     #rulesContent::-webkit-scrollbar-thumb {
-      background: #888;
+      background: #888; 
     }
     #rulesContent::-webkit-scrollbar-thumb:hover {
-      background: #555;
+      background: #555; 
     }
     #rulesHeader {
       text-align: right;
       position: relative;
     }
     #closeButton {
-      background: none;
-      color: black;
+      background: red;
+      color: white;
       border: none;
+      border-radius: 50%;
       font-size: 20px;
       cursor: pointer;
+      width: 40px;
+      height: 40px;
+      line-height: 40px;
+      text-align: center;
+      position: absolute;
+      top: -20px;
+      right: -20px;
+    }
+    /* Firefox Mobile-specific styles */
+    @-moz-document url-prefix() {
+      body.mobile #terminal {
+        margin-top: 20px; /* Push the terminal up on Firefox mobile */
+      }
     }
     /* Mobile-specific styles */
     body.mobile #terminal {
@@ -456,7 +470,7 @@
     });
   </script>
 
-<py-script>	
+  <py-script>	
 import random
 import time
 import sys
@@ -1375,6 +1389,8 @@ async def prompt_for_discard(player_hand, num_cards):
 
 main()
   </py-script>
+
+
 
 </body>
 </html>
