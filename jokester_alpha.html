@@ -43,7 +43,7 @@
       width: 100%;
       height: 100%;
       flex-grow: 1;
-      font-size: 1em;
+      font-size: 1.1em;
       box-sizing: border-box;
       word-wrap: break-word;
     }
@@ -78,7 +78,6 @@
       outline: none;
       font-size: 1.1em;
       margin-left: 0;
-      pointer-events: auto; /* Ensure the input is clickable */
     }
     #prompt {
       display: inline-block;
@@ -352,10 +351,17 @@
         btn.innerText = button.label;
         btn.onclick = () => {
           addTextToInput(button.value);
-          userInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' })); // Simulate Enter key press
+          // Remove auto-send on click
         };
         mobileButtons.appendChild(btn);
       });
+      const sendButton = document.createElement('button');
+      sendButton.classList.add('send-button');
+      sendButton.innerText = 'Send';
+      sendButton.onclick = () => {
+        userInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+      };
+      mobileButtons.appendChild(sendButton);
       mobileButtons.style.display = 'flex';
     }
 
@@ -405,6 +411,7 @@
       }
     });
   </script>
+  
 
   <py-script>	
 
@@ -1320,7 +1327,6 @@ async def prompt_for_discard(player_hand, num_cards):
 
 main()
   </py-script>
-
 
 </body>
 </html>
