@@ -142,6 +142,7 @@
     body.mobile #user-input {
       font-size: 1em;
       margin-top: 5px;
+      pointer-events: none; /* Prevents keyboard from appearing */
     }
     body.mobile #rulesButton {
       font-size: 14px;
@@ -171,10 +172,10 @@
       background-color: gold;
       color: black;
       border: none;
-      padding: 10px;
+      padding: 8px;
       border-radius: 5px;
-      font-size: 16px;
-      margin: 5px;
+      font-size: 14px;
+      margin: 3px;
       cursor: pointer;
       flex: 1 1 18%;
       text-align: center;
@@ -183,10 +184,10 @@
       background-color: black;
       color: gold;
       border: 2px solid gold;
-      padding: 10px;
+      padding: 8px;
       border-radius: 5px;
-      font-size: 16px;
-      margin: 5px;
+      font-size: 14px;
+      margin: 3px;
       cursor: pointer;
       flex: 1 1 40%;
       text-align: center;
@@ -392,22 +393,22 @@ async def fast_print(message):
     await print_message(message, delay=0.0025, batch_size=5)  # Adjusted delay and batch size
 
 async def slow_input(prompt):
-    await fast_print(prompt)
-    user_input.disabled = False
-    user_input.focus()
+	await fast_print(prompt)
+	user_input.disabled = False
+	user_input.focus()
 
-    promise = asyncio.Future()
-    def on_input(event):
-        command = event.detail
-        promise.set_result(command)
+	promise = asyncio.Future()
+	def on_input(event):
+		command = event.detail
+		promise.set_result(command)
 
-    input_handler = create_proxy(on_input)
-    document.addEventListener('input-received', input_handler, {'once': True})
-    result = await promise
-    document.removeEventListener('input-received', input_handler)
-    input_handler.destroy()
-    user_input.disabled = True
-    return result.strip().lower()
+	input_handler = create_proxy(on_input)
+	document.addEventListener('input-received', input_handler, {'once': True})
+	result = await promise
+	document.removeEventListener('input-received', input_handler)
+	input_handler.destroy()
+	user_input.disabled = True
+	return result.strip().lower()
 
 async def safe_int_input(prompt, min_val, max_val):
     while True:
@@ -1256,9 +1257,6 @@ async def prompt_for_discard(player_hand, num_cards):
     return chosen_cards
 
 main()
-		
-
-
 
   </py-script>
 </body>
