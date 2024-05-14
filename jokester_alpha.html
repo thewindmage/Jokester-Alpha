@@ -455,7 +455,7 @@ async def slow_input(prompt):
     is_mobile = 'Mobi' in window.navigator.userAgent or 'Android' in window.navigator.userAgent
 
     if is_mobile:
-        if prompt.toLowerCase().includes("jokester") or prompt.toLowerCase().includes("your choice (j/s/b):"):
+        if prompt.lower().includes("jokester") or prompt.lower().includes("your choice (j/s/b):"):
             window.showJokesterButtons()
         else:
             window.showNumberButtons()
