@@ -373,30 +373,912 @@
     });
   </script>
   <py-script>
-    from js import document, window
-    import asyncio
-    from pyodide import create_proxy
+	
+from js import document, window
+import asyncio
+from pyodide import create_proxy
 
-    output_div = document.getElementById('output')
-    user_input = document.getElementById('user-input')
+output_div = document.getElementById('output')
+user_input = document.getElementById('user-input')
 
-    async def slow_input(prompt):
-        await fast_print(prompt)
-        user_input.disabled = False
-        user_input.focus()
+async def print_message(message, delay, batch_size=7):
+    temp_div = document.createElement('div')  # Create a new div for each message
+    output_div.appendChild(temp_div)  # Add the new div to the output container
+    partial_message = ''
+    for i, char in enumerate(message):
+        partial_message += char
+        if (i + 1) % batch_size == 0 or i == len(message) - 1:
+            temp_div.innerHTML += partial_message  # Append batch of characters to the div
+            partial_message = ''  # Reset the partial message
+            output_div.scrollTop = output_div.scrollHeight  # Scroll to the bottom
+            await asyncio.sleep(delay)
+    temp_div.innerHTML += '<br>'  # Append a line break after the message
+    output_div.scrollTop = output_div.scrollHeight  # Scroll to the bottom
 
-        promise = asyncio.Future()
-        def on_input(event):
-            command = event.detail
-            promise.set_result(command)
+async def insta_print(message):
+    """
+    Prints a message instantly to the output area with a preceding line break.
+    Args:
+        message (str): The message to be printed.
+    """
+    output_div = document.getElementById('output')  # Get the output div by its ID
+    new_div = document.createElement('div')
+    new_div.innerHTML = f"<br>{message}"  # Add a line break before the message
+    output_div.appendChild(new_div)
+    output_div.scrollTop = output_div.scrollHeight  # Scroll to make sure the new message is visible
 
-        input_handler = create_proxy(on_input)
-        document.addEventListener('input-received', input_handler, {'once': True})
-        result = await promise
-        document.removeEventListener('input-received', input_handler)
-        input_handler.destroy()
-        user_input.disabled = True
-        return result.strip().lower()
+async def slow_print(message):
+    await print_message(message, delay=0.07, batch_size=5)  # Adjusted delay and batch size
+
+async def fast_print(message):
+    await print_message(message, delay=0.0025, batch_size=5)  # Adjusted delay and batch size
+
+async def slow_input(prompt):
+	await fast_print(prompt)
+	user_input.disabled = False
+	user_input.focus()
+
+	promise = asyncio.Future()
+	def on_input(event):
+		command = event.detail
+		promise.set_result(command)
+
+	input_handler = create_proxy(on_input)
+	document.addEventListener('input-received', input_handler, {'once': True})
+	result = await promise
+	document.removeEventListener('input-received', input_handler)
+	input_handler.destroy()
+	user_input.disabled = True
+	return result.strip().lower()
+
+async def safe_int_input(prompt, min_val, max_val):
+    while True:
+        try:
+            # Display prompt and receive input
+            input_str = await slow_input(prompt)
+            # Convert input to an integer
+            selected = int(input_str)
+            # Check if the input is within the valid range
+            if min_val <= selected <= max_val:
+                return selected - 1  # Subtract 1 to convert to zero-indexed
+            else:
+                await fast_print(f"Please enter a number between {min_val} and {max_val}.")
+        except ValueError:
+            # Handle non-integer inputs
+            await fast_print("Invalid input. Please enter a valid number.")
+
+
+async def main():
+    global bluffing_history, joker_possession
+    bluffing_history = {i: {'bluffs': 0, 'total_calls': 0} for i in range(4)}  # Default to max 4 if AI not chosen
+    joker_possession = {i: 0 for i in range(4)}
+
+    while True:
+        mode = await slow_input("Enter 'AI' to play against AI: ")
+        if mode == 'ai':
+            num_players = 4
+            await slow_print("Starting a game against 3 AI opponents.")
+            break
+        elif mode.isdigit() and 2 <= int(mode) <= 10:
+            num_players = int(mode)
+            await slow_print(f"Starting a game with {num_players} players.")
+            break
+        else:
+            await fast_print("\nInvalid input. Please enter 'AI' or a number of players from 2 to 10.\n")
+
+    # Assuming setup_game and related functions are defined correctly and available
+    players_hands, standard_deck, discard_pile, player_sets, played_jokers, joker_possession = await setup_game(num_players)
+    current_player = 0
+
+    while len(standard_deck) > 0:
+        await insta_print("-" * 50)
+        await slow_print(f"Player {current_player + 1}'s turn. Current score: {player_sets[current_player]} sets")
+        if mode.lower() == 'ai' and current_player != 0:
+            # Assuming advanced_ai_turn function is defined and correctly handles asynchronous operations
+            standard_deck, discard_pile, _ = await advanced_ai_turn(players_hands[current_player], standard_deck, discard_pile, players_hands, current_player, num_players, player_sets, played_jokers, joker_possession, bluffing_history, mode)
+            await asyncio.sleep(2)
+        else:
+            # Assuming play_turn function is defined and correctly handles asynchronous operations
+            standard_deck, discard_pile, _ = await play_turn(players_hands[current_player], standard_deck, discard_pile, players_hands, current_player, num_players, player_sets, played_jokers, joker_possession, mode, bluffing_history)
+
+        if await check_joker_victory(joker_possession, current_player):
+            break
+
+        if len(standard_deck) == 0:
+            await slow_print("The deck is empty. The game will end after this round.")
+        current_player = (current_player + 1) % num_players
+
+    await print_final_scores(player_sets)
+    while True:
+        play_again = await slow_input("Do you want to start a new game? (y/n): ")
+        if play_again == 'y':
+            await main()
+            break
+        elif play_again == 'n':
+            await fast_print("Thanks for playing!")
+            await asyncio.sleep(1.5)
+            break
+        else:
+            await fast_print("Invalid input. Please enter 'y' to play again or 'n' to exit.")
+
+import random
+import time
+import sys
+
+# Define card decks
+SUITS = ['Hearts', 'Diamonds', 'Clubs', 'Spades']
+RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King', 'Ace']
+MAJOR_ARCANA = ['The Fool', 'The Magician', 'The High Priestess', 'The Empress', 'The Emperor',
+                'The Hierophant', 'The Lovers', 'The Chariot', 'Strength', 'The Hermit',
+                'Wheel of Fortune', 'Justice', 'The Hanged Man', 'Death', 'Temperance',
+                'The Devil', 'The Tower', 'The Star', 'The Moon', 'The Sun', 'Judgement', 'The World']
+
+def create_deck():
+    """ Create a standard 54-card deck including two Jokers. """
+    deck = [{'rank': rank, 'suit': suit} for suit in SUITS for rank in RANKS]
+    deck += [{'rank': 'Joker', 'suit': 'Black'}, {'rank': 'Joker', 'suit': 'Red'}]
+    return deck
+
+async def shuffle_deck(deck):
+    """ Shuffle the deck of cards. """
+    random.shuffle(deck)
+    await slow_print("Deck has been shuffled.\n")
+    return deck
+
+def deal_cards(deck, num_players):
+    """ Deal cards to players. """
+    hand_size = 12 if num_players == 2 else 10
+    players_hands = [deck[i * hand_size:(i + 1) * hand_size] for i in range(num_players)]
+    remaining_deck = deck[num_players * hand_size:]
+    slow_print(f"Dealt cards to {num_players} players.")
+    return players_hands, remaining_deck
+
+async def display_hand(hand):
+    """ Display the player's hand with numbered labels, sorted by rank and then suit directly into the HTML DOM, with a delay. """
+    sorted_hand = sorted(hand, key=lambda card: (rank_value(card), card['suit']))
+    for idx, card in enumerate(sorted_hand):
+        card_div = document.createElement('div')  # Create a new div for each card
+        card_div.innerHTML = f"{idx + 1}: {card['rank']} of {card['suit']}"
+        output_div.appendChild(card_div)  # Append each card div to the output container
+        await asyncio.sleep(0.005)  # Delay before displaying the next card
+        output_div.scrollTop = output_div.scrollHeight  # Scroll to the bottom
+
+def draw_cards(deck, num_cards, player_index, joker_possession):
+    if len(deck) < num_cards:
+        raise ValueError("Not enough cards in the deck to draw the requested number of cards.")
+    drawn_cards = deck[:num_cards]
+    deck[:] = deck[num_cards:]  # Remove drawn cards from the deck
+
+    # Update joker possession if a Joker is drawn
+    for card in drawn_cards:
+        if card['rank'] == 'Joker':
+            joker_possession[player_index] += 1
+
+    return drawn_cards, deck
+
+async def display_discard_pile(discard_pile):
+    if not discard_pile:
+        await slow_print("\nThe discard pile is currently empty.")
+    else:
+        await slow_print("\nCurrent discard pile contains:")
+        for card in discard_pile:
+            await slow_print(f"{card['rank']} of {card['suit']}")
+
+async def check_joker_victory(joker_possession, current_player):
+    """Check if the current player has won with four Jokers."""
+    if joker_possession[current_player] >= 4:
+        await slow_print(f"Player {current_player + 1} wins the game as the 'Jokester' with four Jokers!")
+        return True
+    return False
+
+async def discard_card(player_hand, discard_pile):
+    """
+    Prompts the player to choose one card to discard.
+    Args:
+        player_hand (list): The player's hand.
+        discard_pile (list): The discard pile.
+    """
+    await slow_print("\nPlease select a card to discard:")
+    await display_hand(player_hand)  # Display the current hand
+
+    valid_choice = False
+    while not valid_choice:
+        try:
+            choice = await safe_int_input(f"Enter card number to discard (1-{len(player_hand)}): ", 1, len(player_hand))
+            if 0 <= choice < len(player_hand):
+                card_to_discard = player_hand.pop(choice)
+                discard_pile.append(card_to_discard)
+                await fast_print(f"Discarded: {card_to_discard['rank']} of {card_to_discard['suit']}")
+                valid_choice = True
+            else:
+                await fast_print("Invalid choice, try again.")
+        except ValueError:
+            await fast_print("Please enter a valid integer.")
+
+def check_for_four_jokers(player_hand, played_jokers):
+    """ Check if the player has a total of four Jokers in hand and among played sets. """
+    jokers_in_hand = sum(1 for card in player_hand if card['rank'] == 'Joker')
+    total_jokers = jokers_in_hand + played_jokers
+    if total_jokers >= 4:
+        return True
+    return False
+
+async def advanced_ai_turn(player_hand, deck, discard_pile, players_hands, current_player, num_players, player_sets, played_jokers, joker_possession, bluffing_history, mode):
+    """
+    Advanced AI turn logic, including strategic decisions for drawing cards, discarding, playing sets, 
+    and using Jokers for Jokester calls.
+    """
+    num_cards_left_in_deck = len(deck)
+    late_game = num_cards_left_in_deck < (len(deck) * 0.25)
+    early_game = num_cards_left_in_deck > (len(deck) * 0.75)
+    deck_size = len(deck)  # Calculate the current size of the deck
+
+    # Adjusting discard pile value threshold for making a Jokester call
+    valuable_discard_threshold = 7  # Consider discard pile valuable if it has at least 7 cards
+    discard_pile_valuable = len(discard_pile) >= valuable_discard_threshold and calculate_discard_pile_value(discard_pile, player_hand) > 15
+    discard_value = calculate_discard_pile_value(discard_pile, player_hand)
+    
+    # Decision making for drawing cards
+    if should_draw_from_discard(player_hand, discard_pile, joker_possession[current_player], bluffing_history):
+        card_drawn = discard_pile.pop()
+        player_hand.append(card_drawn)
+        await slow_print(f"AI Player {current_player + 1} draws from the discard pile.")
+    else:
+        num_cards_to_draw = 2 if len(deck) >= 2 else len(deck)
+        drawn_cards, deck = draw_cards(deck, num_cards_to_draw, current_player, joker_possession)
+        player_hand.extend(drawn_cards)
+        await slow_print(f"AI Player {current_player + 1} draws {num_cards_to_draw} cards from the deck.")
+
+    # Evaluate making a Jokester call with Joker
+    if 'Joker' in [card['rank'] for card in player_hand]:
+        if should_use_joker_for_jokester_call(player_hand, discard_pile, current_player, joker_possession, num_cards_left_in_deck):
+            await make_jokester_call_with_joker(player_hand, discard_pile, current_player, joker_possession)
+            return deck, discard_pile, True
+
+    # Evaluate making a Jokester call with a complete set of four
+    if use_complete_set_for_jokester_call(player_hand, discard_pile, num_cards_left_in_deck) or (discard_value > 15 and random.random() < 0.07):
+        await handle_jokester(player_hand, discard_pile, players_hands, current_player, num_players, player_sets, bluffing_history, mode, joker_possession, deck_size)
+        return deck, discard_pile, True
+
+    # Play a set if possible
+    if await try_play_set(player_hand, current_player):
+        player_sets[current_player] += 1
+        await fast_print(f"New Score: {player_sets[current_player]}.")
+    else:
+        await discard_least_useful_cards(player_hand, discard_pile, num_cards=1, current_player=current_player)
+
+    return deck, discard_pile, False
+
+def should_use_joker_for_jokester_call(player_hand, discard_pile, current_player, joker_possession, num_cards_left_in_deck):
+    has_joker = any(card['rank'] == 'Joker' for card in player_hand)
+    discard_value = calculate_discard_pile_value(discard_pile, player_hand)
+    
+    valuable_threshold = 24
+
+    return has_joker and discard_value > valuable_threshold
+
+async def make_jokester_call_with_joker(player_hand, discard_pile, current_player, joker_possession):
+    """
+    Execute a Jokester call using a Joker if it's beneficial based on the discard pile's value.
+    """
+    discard_value = calculate_discard_pile_value(discard_pile, player_hand)
+    if discard_value > 5:  # Increased value threshold for using a Joker
+        joker_to_use = next(card for card in player_hand if card['rank'] == 'Joker')
+        player_hand.remove(joker_to_use)
+        joker_possession[current_player] -= 1
+        player_hand.extend(discard_pile)
+        discard_pile.clear()
+        await slow_print(f"AI Player {current_player + 1} uses a Joker to make a Jokester call and claims the discard pile.")
+        return True
+    return False
+
+def use_complete_set_for_jokester_call(player_hand, discard_pile, num_cards_left_in_deck):
+    """
+    Decides whether to use a complete set for a Jokester call based on the value of the discard pile.
+    Ensures a set of four is present before allowing a Jokester declaration.
+    """
+    # Count occurrences of each card rank in the player's hand
+    rank_count = {card['rank']: 0 for card in player_hand}
+    for card in player_hand:
+        rank_count[card['rank']] += 1
+
+    # Check for any complete set of four
+    has_complete_set = False
+    for count in rank_count.values():
+        if count >= 4:
+            has_complete_set = True
+            break
+
+    # Calculate the discard pile's value
+    discard_value = calculate_discard_pile_value(discard_pile, player_hand)
+
+    # Set a valuable threshold for the discard pile to justify using a set
+    valuable_threshold = 16  # Adjust this value based on gameplay analysis or testing
+
+    # Use a complete set for a Jokester call only if both conditions are met
+    if has_complete_set and discard_value > valuable_threshold:
+        return True
+
+    return False
+
+def opponent_has_more_jokers(player_index, joker_possession):
+    """
+    Check if any opponent has more Jokers, which might influence strategic decisions.
+    """
+    return joker_possession[player_index] > 1
+
+async def use_joker(player_hand, discard_pile):
+    """ Removes a Joker from the hand and claims the discard pile. """
+    player_hand[:] = [card for card in player_hand if card['rank'] != 'Joker']
+    player_hand.extend(discard_pile)
+    discard_pile.clear()
+    await slow_print("Used a Joker for Jokester call. Claimed the discard pile.")
+
+async def use_set_of_four(player_hand, discard_pile, rank_count):
+    """ Finds and removes a set of four of the same rank from the hand and claims the discard pile. """
+    for rank, count in rank_count.items():
+        if count >= 4:
+            # Remove four cards of this rank
+            player_hand[:] = [card for card in player_hand if card['rank'] != rank or count <= 4]
+            count -= 4
+            break
+    player_hand.extend(discard_pile)
+    discard_pile.clear()
+    await slow_print(f"Used a set of four {rank} for Jokester call. Claimed the discard pile.")
+
+async def enforce_discard_penalty(player_hand, discard_pile, is_human, num_cards=2, current_player=None):
+    if is_human:
+        await slow_print("\nYou need to discard cards due to losing a Jokester challenge.")
+
+        chosen_cards = await prompt_for_discard(player_hand, num_cards)
+        for card in chosen_cards:
+            player_hand.remove(card)
+            discard_pile.append(card)
+            await slow_print(f"Discarded {card['rank']} of {card['suit']}")
+    else:
+        await discard_least_useful_cards(player_hand, discard_pile, num_cards, current_player=current_player)
+
+async def select_cards_to_discard(hand, num_cards):
+    """
+    Allow a human player to choose specific cards to discard as a penalty.
+    Args:
+        hand (list): The player's hand.
+        num_cards (int): Number of cards the player needs to discard.
+    Returns:
+        list: The list of cards chosen to be discarded.
+    """
+    chosen_cards = []
+    await fast_print("Please choose cards to discard:")
+    for i, card in enumerate(hand):
+        await fast_print(f"{i + 1}: {card['rank']} of {card['suit']}")
+    
+    while len(chosen_cards) < num_cards:
+        choice = int(slow_input("Enter the number of the card to discard: ")) - 1
+        if 0 <= choice < len(hand):
+            chosen_cards.append(hand[choice])
+        else:
+            await fast_print("Invalid choice, please select a valid card number.")
+    
+    return chosen_cards
+
+async def discard_least_useful_cards(hand, discard_pile, num_cards=1, current_player=None):
+    """
+    Discards the least useful cards from the hand, excluding Jokers unless necessary.
+    Args:
+        hand (list): List of card dictionaries.
+        discard_pile (list): List of card dictionaries representing the discard pile.
+        num_cards (int): Number of cards to discard.
+    """
+    # Sort non-Joker cards by least utility based on game-specific logic (e.g., rank value, likelihood to form sets)
+    sorted_non_jokers = sorted(
+        [card for card in hand if card['rank'] != 'Joker'],
+        key=lambda card: (rank_value(card), -sum(1 for x in hand if x['rank'] == card['rank'])),
+        reverse=True
+    )
+    
+    # Determine the number of non-Jokers to discard
+    num_non_jokers_to_discard = min(len(sorted_non_jokers), num_cards)
+    cards_to_discard = sorted_non_jokers[:num_non_jokers_to_discard]
+
+    # If not enough non-Jokers, include Jokers to make up the number
+    if num_non_jokers_to_discard < num_cards:
+        jokers_to_discard = [card for card in hand if card['rank'] == 'Joker'][:num_cards - num_non_jokers_to_discard]
+        cards_to_discard.extend(jokers_to_discard)
+
+    # Execute the discarding
+    for card in cards_to_discard:
+        hand.remove(card)
+        discard_pile.append(card)
+        await slow_print(f"AI Player {current_player + 1} discards a card.")
+        await slow_print(f"Discarded {card['rank']} of {card['suit']}")
+
+def calculate_potential_hand_value(hand, discard_pile):
+    """Calculate how much the discard pile could potentially improve the hand for forming sets of four."""
+    rank_count = {}
+    
+    # Initialize counts for all ranks in hand
+    for card in hand:
+        if card['rank'] in rank_count:
+            rank_count[card['rank']] += 1
+        else:
+            rank_count[card['rank']] = 1
+    
+    # Update counts with cards from the discard pile
+    for card in discard_pile:
+        if card['rank'] in rank_count:
+            rank_count[card['rank']] += 1
+        else:
+            rank_count[card['rank']] = 1
+
+    # Evaluate potential sets that could be completed by adding discard pile
+    potential_sets = sum(1 for count in rank_count.values() if count >= 4)
+    return potential_sets
+    
+def has_complete_set(player_hand):
+    """Check if the hand has any complete sets of four."""
+    card_count = {}
+    for card in player_hand:
+        if card['rank'] not in card_count:
+            card_count[card['rank']] = 0
+        card_count[card['rank']] += 1
+
+    return any(count == 4 for count in card_count.values())
+
+def calculate_discard_pile_value(discard_pile, player_hand):
+    """
+    Calculate the estimated value of the discard pile based on the potential to complete sets or its card count.
+    """
+    value = 0
+    hand_ranks = {card['rank'] for card in player_hand}
+    for card in discard_pile:
+        if card['rank'] in hand_ranks:
+            value += 5  # Assign higher value if the card can potentially help complete a set
+        else:
+            value += 1  # Assign minimal value otherwise
+    return value
+
+def should_draw_from_discard(player_hand, discard_pile, joker_possession, bluffing_history):
+    if not discard_pile:
+        return False
+
+    top_card = discard_pile[-1]
+    rank_count = {rank: 0 for rank in RANKS + ['Joker']}
+    for card in player_hand:
+        rank_count[card['rank']] += 1
+
+    if rank_count[top_card['rank']] == 3:
+        return True
+    elif rank_count[top_card['rank']] == 2 and len(discard_pile) > 1:
+        return True
+    return False
+
+async def setup_game(num_players):
+    # Setup initial game state with correct zero-based indexing for player hands
+    standard_deck = create_deck() * 2  # Two decks shuffled together
+    await shuffle_deck(standard_deck)
+    players_hands = {}
+    hand_size = 12 if num_players == 2 else 10
+    for i in range(num_players):
+        players_hands[i] = [standard_deck.pop() for _ in range(hand_size)]
+    discard_pile = []
+    player_sets = {i: 0 for i in range(num_players)}  # Initialize player sets using zero-based index
+    played_jokers = {i: 0 for i in range(num_players)}  # Initialize joker tracking
+    joker_possession = {i: 0 for i in range(num_players)}  # Track possession of jokers
+    return players_hands, standard_deck, discard_pile, player_sets, played_jokers, joker_possession
+
+async def print_final_scores(player_sets):
+    # Determine and print the final scores
+    max_sets = max(player_sets.values())
+    winners = [player_id for player_id, sets in player_sets.items() if sets == max_sets]
+    if len(winners) > 1:
+        winners_str = ', '.join(f"Player {winner + 1}" for winner in winners)
+        await slow_print(f"It's a tie between {winners_str} with {max_sets} sets each!")
+    else:
+        winner = winners[0]
+        await slow_print(f"Player {winner + 1} wins with {max_sets} sets!")
+
+async def display_game_status(deck, discard_pile):
+    """ Displays the current status of the deck and the top card of the discard pile. """
+    await slow_print(f"Number of cards left in deck: {len(deck)}")
+    if discard_pile:
+        top_card = discard_pile[-1]
+        await slow_print(f"Number of cards in discard pile: {len(discard_pile)}")
+        await slow_print(f"Top card of discard pile: {top_card['rank']} of {top_card['suit']}")
+    else:
+        await slow_print("Discard pile is currently empty.")
+
+async def play_turn(player_hand, deck, discard_pile, players_hands, current_player, num_players, player_sets, played_jokers, joker_possession, mode, bluffing_history):
+    game_over = False
+    deck_size = len(deck)  # Calculate the current size of the deck
+
+    await display_game_status(deck, discard_pile)
+    await fast_print("\nYour hand at the start of your turn:")
+    await display_hand(player_hand)
+    
+    # Draw phase with the option to view discard pile
+    while True:
+        await fast_print("\nChoose how to draw cards:")
+        await fast_print("1) Draw two cards from the deck")
+        await fast_print("2) Draw one card from the discard pile")
+        await fast_print("3) View the discard pile")
+        draw_choice = await slow_input("Enter your choice: ")
+
+        if draw_choice == '1' and len(deck) >= 2:
+            drawn_cards, deck = draw_cards(deck, 2, current_player, joker_possession)
+            player_hand.extend(drawn_cards)
+            card_descriptions = ', '.join([f"{card['rank']} of {card['suit']}" for card in drawn_cards])
+            await slow_print(f"You drew: {card_descriptions}\n")
+            break
+        elif draw_choice == '2' and discard_pile:
+            drawn_card = discard_pile.pop()
+            player_hand.append(drawn_card)
+            await slow_print(f"You drew from the discard pile: {drawn_card['rank']} of {drawn_card['suit']}\n")
+            break
+        elif draw_choice == '3':
+            await display_discard_pile(discard_pile)
+        else:
+            await fast_print("\nInvalid choice or not enough cards. Please choose again.")
+
+    player_hand.sort(key=lambda card: rank_value(card))
+    await fast_print("Your hand:")
+    await display_hand(player_hand)
+
+    if check_for_four_jokers(player_hand, played_jokers[current_player]):
+        await fast_print(f"Player {current_player + 1} wins immediately with four Jokers!")
+        return deck, discard_pile, True
+
+    # Action phase with the option to view discard pile
+    while True:
+        await fast_print("\nChoose action:")
+        await fast_print("1) Play a set")
+        await fast_print("2) Discard a card")
+        await fast_print("3) Declare 'Jokester'")
+        await fast_print("4) View the discard pile")
+        action_choice = await slow_input("Enter your choice: ")
+
+        if action_choice == '1':
+            if await try_play_set(player_hand, current_player):
+                player_sets[current_player] += 1
+                await slow_print(f"Set played successfully. New score for Player {current_player + 1}: {player_sets[current_player]} sets.")
+                break
+            else:
+                await fast_print("\nNo valid set to play.")
+        elif action_choice == '2':
+            await discard_card(player_hand, discard_pile)
+            break
+        elif action_choice == '3':
+            await handle_jokester(player_hand, discard_pile, players_hands, current_player, num_players, player_sets, bluffing_history, mode, joker_possession, deck_size)
+            break
+        elif action_choice == '4':
+            await display_discard_pile(discard_pile)
+        else:
+            await slow_print("\nInvalid action. Please choose a valid option.")
+
+    return deck, discard_pile, False
+
+def rank_value(card):
+    rank_order = {
+        '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9,
+        '10': 10, 'Jack': 11, 'Queen': 12, 'King': 13, 'Ace': 14, 'Joker': 15
+    }
+    suit_order = {'Clubs': 1, 'Diamonds': 2, 'Hearts': 3, 'Spades': 4}
+    return (rank_order.get(card['rank'], 0), suit_order.get(card['suit'], 0))
+
+async def try_play_set(player_hand, current_player):
+    """
+    Attempt to play a set from the player's hand, prioritizing non-Joker high-value sets.
+    If no sets are available, then check if a Joker can be played as a complete set.
+    """
+    rank_value = {
+        'Ace': 14, 'King': 13, 'Queen': 12, 'Jack': 11, '10': 10, 
+        '9': 9, '8': 8, '7': 7, '6': 6, '5': 5, '4': 4, '3': 3, '2': 2
+    }
+
+    # Create a count of non-Joker cards
+    rank_count = {}
+    for card in player_hand:
+        if card['rank'] != 'Joker':
+            if card['rank'] in rank_count:
+                rank_count[card['rank']].append(card)
+            else:
+                rank_count[card['rank']] = [card]
+
+    # Attempt to form sets from non-Joker cards
+    for rank, cards in sorted(rank_count.items(), key=lambda x: rank_value.get(x[0], 0), reverse=True):
+        if len(cards) >= 4:
+            # Play a complete set of four
+            for _ in range(4):
+                player_hand.remove(cards.pop(0))
+            await slow_print(f"Player {current_player + 1} plays a set of {rank}.")
+            return True
+
+    # Check and play a Joker as a complete set if it exists and no other sets were played
+    if any(card['rank'] == 'Joker' for card in player_hand):
+        # Find and remove the first Joker
+        for card in player_hand:
+            if card['rank'] == 'Joker':
+                player_hand.remove(card)
+                await slow_print("Playing a Joker as a complete set.")
+                return True
+
+    #slow_print("No valid set to play.")
+    return False
+
+def remove_joker_from_hand(player_hand):
+    for index, card in enumerate(player_hand):
+        if card['rank'] == 'Joker':
+            del player_hand[index]
+            break
+
+async def remove_set_of_four_and_claim(player_hand, set_rank, player_sets, current_player, discard_pile):
+    """
+    Remove a set of four cards of the specified rank from the player's hand,
+    claim the discard pile, and update the player's score.
+    """
+    # Recalculate rank count within the function to ensure accuracy
+    rank_count = {}
+    for card in player_hand:
+        if card['rank'] in rank_count:
+            rank_count[card['rank']] += 1
+        else:
+            rank_count[card['rank']] = 1
+
+    # Identify indices to remove, aiming to remove exactly four cards of the set rank
+    indices_to_remove = []
+    removed_count = 0
+    for index, card in enumerate(player_hand):
+        if card['rank'] == set_rank and removed_count < 4:
+            indices_to_remove.append(index)
+            removed_count += 1
+            if removed_count == 4:
+                break
+
+    # Remove cards by reverse iterating over indices to avoid index shift issues
+    for index in sorted(indices_to_remove, reverse=True):
+        del player_hand[index]
+
+    # Claim the discard pile and clear it
+    player_hand.extend(discard_pile)
+    discard_pile.clear()
+
+    # Increment player's set count
+    player_sets[current_player] += 1
+
+async def handle_jokester(player_hand, discard_pile, players_hands, current_player, num_players, player_sets, bluffing_history, mode, joker_possession, deck_size):
+    player_description = "Player 1" if current_player == 0 else f"AI Player {current_player + 1}"
+    await slow_print(f"{player_description} is preparing a Jokester declaration.")
+    
+    has_set_of_four, set_rank = check_for_sets_of_four(player_hand)
+    has_joker = any(card['rank'] == 'Joker' for card in player_hand)
+    
+    if current_player == 0:  # Human player
+        has_set_of_four, set_rank = check_for_sets_of_four(player_hand)
+
+        options = {}
+        if has_joker:
+            options['j'] = "Use a Joker ('J')"
+        if has_set_of_four:
+            options['s'] = "Declare a Set of Four ('S')"
+        options['b'] = "Bluff ('B')"
+        option_texts = [f"'{key.upper()}' to {value}" for key, value in options.items()]
+
+        # Display options
+        for key, value in options.items():
+            await fast_print(f"{key}: {value}")  # Prints each option and adds a line break
+        
+        # Convert keys to option texts and print overview of options
+        await slow_print("You have the following options: " + ', '.join(option_texts))
+
+        while True:
+            choice = await slow_input("Your choice (J/S/B): ")
+            if choice in options:
+                if choice == 'j' and has_joker:
+                    break
+                elif choice == 's' and has_set_of_four:
+                    break
+                elif choice == 'b':
+                    break
+                else:
+                    await fast_print("Currently, you do not meet the conditions for this choice. Please choose a different option.")
+            else:
+                await fast_print(f"Invalid choice. Please choose from the available options: {', '.join(options.keys()).upper()}.")
+
+        # Process based on choice
+        if choice == 'j' and has_joker:
+            remove_joker_from_hand(player_hand)
+            player_hand.extend(discard_pile)
+            discard_pile.clear()
+            await slow_print("Joker used. Jokester call successful without challenge. Discard pile claimed.")
+        elif choice == 's' and has_set_of_four:
+            await remove_set_of_four_and_claim(player_hand, set_rank, player_sets, current_player, discard_pile)
+            await slow_print("Set of four declared successfully. Discard pile claimed after challenges.")
+            challenge_result = await prompt_and_resolve_challenges(player_hand, discard_pile, players_hands, current_player, num_players, 'set', has_set_of_four, player_sets, set_rank, deck_size)
+            #await slow_print(f"Set played successfully. New score for Player {current_player + 1}: {player_sets[current_player]} sets.")
+        elif choice == 'b':
+            await slow_print(f"{player_description} declares Jokester with a Bluff! Other players may challenge.")
+            challenge_result = await prompt_and_resolve_challenges(player_hand, discard_pile, players_hands, current_player, num_players, 'bluff', has_set_of_four, player_sets, set_rank, deck_size)
+            if challenge_result == 'no_challenge':
+                player_hand.extend(discard_pile)
+                discard_pile.clear()
+                await slow_print("Jokester claims the discard pile.")
+
+    else:  # AI players
+        has_set_of_four, set_rank = check_for_sets_of_four(player_hand)
+
+        if has_set_of_four:
+            declaration_type = 'set'
+            await remove_set_of_four_and_claim(player_hand, set_rank, player_sets, current_player, discard_pile)
+        else:
+            declaration_type = 'bluff'
+        
+        await slow_print(f"{player_description} declares Jokester! Other players may challenge.")
+        challenge_result = await prompt_and_resolve_challenges(player_hand, discard_pile, players_hands, current_player, num_players, declaration_type, has_set_of_four, player_sets, set_rank if declaration_type == 'set' else None, deck_size)
+        if challenge_result == 'no_challenge':
+            player_hand.extend(discard_pile)
+            discard_pile.clear()
+            await slow_print("Jokester claims the discard pile.")
+
+async def prompt_and_resolve_challenges(player_hand, discard_pile, players_hands, current_player, num_players, declaration_type, has_set_of_four, player_sets, set_rank=None, deck_size=None):
+    challenged = False
+    successful_defense = True  # Start with successful defense
+
+    for i in range(num_players):
+        if i != current_player:
+            should_challenge = False
+            if is_human(i):
+                response = await slow_input(f"Player {i + 1}, do you want to challenge the Jokester call? (y/n): ")
+                while response not in {'y', 'n'}:
+                    await slow_print("\nInvalid input. Please answer 'yes' or 'no'.\n")
+                    response = await slow_input(f"Player {i + 1}, do you want to challenge the Jokester call? (y/n): ")
+                should_challenge = response == 'y'
+            else:
+                should_challenge = should_ai_challenge_jokester(players_hands[i], discard_pile, deck_size)
+
+            if should_challenge:
+                challenged = True
+                await slow_print(f"{('Player 1' if i == 0 else f'AI Player {i + 1}')} challenges the Jokester call!")
+                if declaration_type == 'set':
+                    if has_set_of_four:
+                        await slow_print("Challenge failed. Jokester wins.")
+                        player_hand.extend(discard_pile)
+                        discard_pile.clear()
+                        await enforce_discard_penalty(players_hands[i], discard_pile, is_human(i), num_cards=2, current_player=i)
+                        await slow_print(f"Set played successfully. New score for Player {current_player + 1}: {player_sets[current_player]} sets.")
+                        return 'challenge_failed'  # Challenge failed, no more challenges should be processed
+                    else:
+                        await slow_print("Challenge successful. Jokester loses and challenger gets the discard pile.")
+                        players_hands[i].extend(discard_pile)
+                        discard_pile.clear()
+                        await slow_print(f"Set played successfully. New score for Player {current_player + 1}: {player_sets[current_player]} sets.")
+                        return 'challenge_successful'  # Jokester loses, challenge successful
+                elif declaration_type == 'bluff':
+                    await slow_print("Bluff called out. Challenge successful. Jokester loses and challenger gets the discard pile.")
+                    players_hands[i].extend(discard_pile)
+                    discard_pile.clear()
+                    await slow_print(f"Player {current_player + 1} was bluffing!")
+                    return 'challenge_successful'  # Jokester loses, challenge successful
+
+    if not challenged:
+        await slow_print("No challenges.")
+        await fast_print(f"Score updated to {player_sets[current_player]}.")
+        return 'no_challenge'  # No challenge occurred
+
+    return 'resolved'  # If loop exits normally, consider the challenge resolved
+
+def check_for_sets_of_four(player_hand):
+    """ Check if there's any set of four cards of the same rank in the player's hand. """
+    rank_count = {}
+    for card in player_hand:
+        if card['rank'] in rank_count:
+            rank_count[card['rank']] += 1
+        else:
+            rank_count[card['rank']] = 1
+
+    for rank, count in rank_count.items():
+        if count >= 4:
+            return True, rank
+    return False, None
+
+def should_ai_challenge_jokester(player_hand, discard_pile, deck_size):
+    """
+    Decides probabilistically whether the AI should challenge a Jokester call.
+    
+    Args:
+        player_hand (list): The current hand of the AI player.
+        discard_pile (list): The current discard pile.
+        num_cards_left_in_deck (int): Number of cards left in the deck.
+        
+    Returns:
+        bool: True if the AI decides to challenge the Jokester call, False otherwise.
+    """
+
+    # Base probability of challenging a Jokester call
+    base_probability = 0.1  # 10% chance base
+    
+    # Increase probability if the discard pile is valuable
+    discard_value = calculate_discard_pile_value(discard_pile, player_hand)
+    if discard_value > 15:  # Consider a high value discard pile to be worth more than 15 points
+        base_probability += 0.1  # Increase chance by 10%
+    
+    # Increase probability if nearing the end of the deck
+
+    if deck_size < 15:  # Less than 15 cards left
+        base_probability += 0.05  # Increase chance by 5%
+
+    # Random chance based on calculated probability
+    return random.random() < base_probability
+
+def is_human(player_index):
+    # Human player default to Player 1
+    return player_index == 0
+
+async def enforce_challenge_penalty(challenger_hand, discard_pile, is_human):
+    """
+    Forces the challenger to discard two cards as a penalty for failing a Jokester challenge.
+    Args:
+        challenger_hand (list): The hand of the challenger.
+        discard_pile (list): The discard pile.
+        is_human (bool): Flag to indicate if the player is human.
+    """
+    if len(challenger_hand) < 2:
+        await slow_print("Not enough cards to discard the full penalty. Discarding all remaining cards.")
+        discard_pile.extend(challenger_hand)
+        challenger_hand.clear()
+    else:
+        if is_human:
+            await fast_print("Choose two cards to discard as a penalty:")
+            num_discarded = 0
+            while num_discarded < 2:
+                await fast_print(display_hand(challenger_hand))
+                try:
+                    choice = int(slow_input(f"Enter card number to discard (1-{len(challenger_hand)}): ")) - 1
+                    if 0 <= choice < len(challenger_hand):
+                        card_to_discard = challenger_hand.pop(choice)
+                        discard_pile.append(card_to_discard)
+                        await fast_print(f"Discarded: {card_to_discard['rank']} of {card_to_discard['suit']}")
+                        num_discarded += 1
+                    else:
+                        await ast_print("Invalid choice, try again.")
+                except ValueError:
+                    await fast_print("Please enter a valid integer.")
+        else:
+            # AI automatically discards two least useful cards
+            await discard_least_useful_cards(challenger_hand, discard_pile, 2, current_player=current_player)
+
+async def prompt_for_discard(player_hand, num_cards):
+    """
+    Prompts the player to choose which cards to discard.
+    Args:
+        player_hand (list): The player's hand of cards.
+        num_cards (int): Number of cards the player needs to discard.
+    Returns:
+        list: The list of cards chosen to be discarded.
+    """
+    await fast_print("Please select cards to discard:")
+    # Display the hand of cards, ensuring this function call is correct based on whether it's async
+    if asyncio.iscoroutinefunction(display_hand):
+        await display_hand(player_hand)  # If display_hand is async, await it
+    else:
+        display_hand(player_hand)  # If it's not async, call it normally
+
+    chosen_cards = []
+    while len(chosen_cards) < num_cards:
+        choice = await safe_int_input(f"Enter card number to discard (1-{len(player_hand)}): ", 1, len(player_hand))
+        if player_hand[choice] not in chosen_cards:
+            chosen_cards.append(player_hand[choice])
+            await fast_print(f"Card chosen: {player_hand[choice]['rank']} of {player_hand[choice]['suit']}")
+        else:
+            await fast_print("Card already chosen, try again.")
+
+    # Print cards to be discarded, awaiting each print
+    await fast_print("Cards chosen for discard:")
+    for card in chosen_cards:
+        await fast_print(f"{card['rank']} of {card['suit']}")
+
+    return chosen_cards
+
+main()
+
   </py-script>
 </body>
 </html>
