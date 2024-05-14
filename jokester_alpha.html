@@ -462,7 +462,7 @@ async def slow_input(prompt):
     if is_mobile:
         if prompt == ("Enter 'AI' to play against AI: "):
             window.showInitialButtons()
-        if prompt.lower() == ("your choice (j/s/b): "):
+        elif prompt.lower() == ("your choice (j/s/b): "):
             window.showJokesterButtons()
         else:
             window.showNumberButtons()
